@@ -154,6 +154,7 @@ exports.getGenres =  async () => {
         
         const numGenres = document.querySelector(".canvas").children.length;
         for (let i = 1; i <= numGenres; i++) {
+            console.log(i);
             const genre = document.querySelector("#item" + i);
             [top, left] = getDimensions(genre.getAttribute('style').split("; "));
 
@@ -168,7 +169,7 @@ exports.getGenres =  async () => {
             }
 
             genre.removeChild(genre.childNodes[1]);
-            genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
+            genres[mainGenreIndex].subgenres.push({name: genre.textContent.trim(), distance: minDistance});
         }
         return genres;
     } catch (err) {
@@ -313,7 +314,7 @@ exports.getProbs = async () => {
             probs.traits.feeling, 
             probs.traits.prospecting, 
             probs.traits.turbulent
-        ] = distribution;
+        ] = distribution.map(trait => trait / 100);
         return probs;
     } catch (err) {
         console.log(err);

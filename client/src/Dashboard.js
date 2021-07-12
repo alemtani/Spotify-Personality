@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import useAuth from './useAuth';
 import Profile from './Profile';
+import Card from './Card';
 import Playlist from './Playlist';
-import Personality from './Personality';
 import { Container } from 'react-bootstrap';
 import axios from 'axios';
 
-export default function Dashboard({ code }) {
-    const accessToken = useAuth(code);
+export default function Dashboard({ accessToken }) {
     const [profile, setProfile] = useState(null);
     const [playlists, setPlaylists] = useState(null);
     const [chosenPlaylist, setChosenPlaylist] = useState(null);
@@ -18,6 +16,7 @@ export default function Dashboard({ code }) {
 
     useEffect(() => {
         if (!accessToken) return;
+        console.log(accessToken);
         axios.get('http://localhost:3001/profile', {
             params: {
                 accessToken: accessToken
@@ -36,18 +35,17 @@ export default function Dashboard({ code }) {
         if (!profile || !accessToken) return;
 
         const userId = profile.id;
-        const limit = 10;
         let offset = 0;
         axios.get('http://localhost:3001/playlists', {
             params: {
                 accessToken: accessToken,
                 userId: userId,
-                limit: limit,
                 offset: offset
             }
         })
         .then(res => {
             const newPlaylists = [...res.data.playlists];
+            const limit = res.data.limit;
             const total = res.data.total;
 
             const promisePlaylists = [];
@@ -58,7 +56,6 @@ export default function Dashboard({ code }) {
                         params: {
                             accessToken: accessToken,
                             userId: userId,
-                            limit: limit,
                             offset: offset
                         }
                     })
@@ -95,19 +92,26 @@ export default function Dashboard({ code }) {
             </div>
         )
     }
+
+    if (!chosenPlaylist) {
+        return (
+            <Container className="d-flex flex-column py-2" style={{ height: "100vh" }}>
+                <div>
+                    <Profile profile={profile} key={profile.id}/>
+                </div>
+                <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
+                    {playlists.map(playlist => (
+                        <Card playlist={playlist} key={playlist.id} choosePlaylist={choosePlaylist} />
+                    ))}
+                </div>
+            </Container>
+        );
+    }
+
     return (
         <Container className="d-flex flex-column py-2" style={{ height: "100vh" }}>
-            <div>
-                <Profile profile={profile} key={profile.id}/>
-            </div>
-            <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
-                {playlists.map(playlist => (
-                    <Playlist playlist={playlist} key={playlist.id} choosePlaylist={choosePlaylist} />
-                ))}
-            </div>
-            <div>
-                <Personality accessToken={accessToken} playlist={chosenPlaylist} />
-            </div>
+            <Playlist accessToken={accessToken} playlist={chosenPlaylist} key={chosenPlaylist.id} />
         </Container>
-    );
+    )
+    
 }

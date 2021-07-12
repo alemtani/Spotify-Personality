@@ -1,14 +1,15 @@
 require('dotenv').config();
-const axios = require('axios');
 const cors = require('cors');
 const express = require('express');
 const SpotifyWebApi = require('spotify-web-api-node');
 
 const {getGenres, getProbs} = require('./crawler');
 
+let genres, probs = null;
+
 const app = express();
-app.use(cors())
-.use(express.json());
+app.use(cors());
+app.use(express.json());
 
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
@@ -23,6 +24,39 @@ const smallestImage = obj => {
         if (!smallest.height || image.height < smallest.height) return image;
         return smallest;
     }, obj.images[0]);
+}
+
+const pushTracks = (tracks, track) => {
+    const data = {
+        album: track.album.name,
+        artists: track.artists,
+        id: track.id,
+        name: track.name,
+        uri: track.uri
+    }
+
+    smallestTrackImage = smallestImage(track.album);
+    if (smallestTrackImage) data.imageUrl = smallestTrackImage.url;
+
+    tracks.push(data);
+}
+
+const asyncTimeout = async (timeout) => {
+    setTimeout(() => {}, timeout);
+}
+
+const getArtist = async (artistId, retries) => {
+    try {
+        const data = await spotifyApi.getArtist(artistId);
+        return data;
+    } catch (err) {
+        if (err.headers && err.headers['retry-after']) {
+            await asyncTimeout(parseInt(err.headers['retry-after']) * 1000);
+            return getArtist(artistId);
+        }
+        console.log(err);
+        throw err;
+    }
 }
 
 app.get('/login', (req, res) => {
@@ -102,25 +136,23 @@ app.get('/profile', (req, res) => {
 app.get('/playlists', (req, res) => {
     const accessToken = req.query.accessToken;
     const userId = req.query.userId;
-    const limit = req.query.limit;
     const offset = req.query.offset;
 
     spotifyApi.setAccessToken(accessToken);
 
     spotifyApi.getUserPlaylists(userId, {
-        limit: limit,
         offset: offset
     })
     .then(data => {
         const playlists = [];
-        data.body.items.map(item => {
+        data.body.items.forEach(item => {
             const playlist = {
                 description: item.description,
                 id: item.id,
                 name: item.name,
                 tracks: item.tracks,
                 uri: item.uri
-            }
+            };
 
             smallestPlaylistImage = smallestImage(item);
             if (smallestPlaylistImage) playlist.imageUrl = smallestPlaylistImage.url;
@@ -130,6 +162,7 @@ app.get('/playlists', (req, res) => {
 
         res.json({
             playlists: playlists,
+            limit: data.body.limit,
             total: data.body.total
         });
     })
@@ -139,112 +172,195 @@ app.get('/playlists', (req, res) => {
     });
 });
 
-app.get('/personality', (req, res) => {
-    const accessToken = req.query.accessToken;
-    const playlistId = req.query.playlistId;
+app.post('/playlists', (req, res) => {
+    const accessToken = req.body.accessToken;
+    const name = req.body.name;
 
     spotifyApi.setAccessToken(accessToken);
 
-    spotifyApi.getPlaylist(playlistId)
+    spotifyApi.createPlaylist(name)
     .then(data => {
-        const tracks = data.body.tracks.items;
-        const artists = [];
-        tracks.forEach(track => {
-            track.track.artists.forEach(artist => {
-                artists.push(artist.id);
-            });
+        const playlist = {
+            id: data.body.id,
+            name: data.body.name
+        };
+        
+        res.json(playlist);
+    })
+});
+
+app.get('/:playlist_id/tracks', (req, res) => {
+    const playlistId = req.params.playlist_id;
+
+    const accessToken = req.query.accessToken;
+    const offset = req.query.offset;
+
+    spotifyApi.setAccessToken(accessToken);
+
+    spotifyApi.getPlaylistTracks(playlistId, {
+        offset: offset
+    })
+    .then(data => {
+        const tracks = [];
+
+        data.body.items.forEach(item => {
+            pushTracks(tracks, item.track);
         });
-
-        const userGenres = [];
-        const promiseGenres = [];
-        artists.forEach(artist => {
-            promiseGenres.push(
-                spotifyApi.getArtist(artist)
-                .then(data => {
-                    userGenres.push(...data.body.genres)
-                })
-                .catch(err => {
-                    console.log(err);
-                })
-            );
+        
+        res.json({
+            tracks: tracks,
+            limit: data.body.limit,
+            total: data.body.total
         });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(400);
+    });
+});
 
-        Promise.all(promiseGenres)
-        .then(() => {
-            Promise.all([getGenres(), getProbs()])
-            .then(result => {
-                const [genres, probs] = result;
-                const user = {
-                    extraverted: 0,
-                    observant: 0,
-                    feeling: 0,
-                    prospecting: 0,
-                    turbulent: 0
-                };
+app.post('/:playlist_id/tracks', (req, res) => {
+    const playlistId = req.params.playlist_id;
 
-                const lenSubgenres = userGenres.length;
-                userGenres.forEach(subgenre => {
+    const accessToken = req.body.accessToken;
+    const trackUri = req.body.trackUri;
+
+    spotifyApi.setAccessToken(accessToken);
+
+    spotifyApi.addTracksToPlaylist(playlistId, [trackUri])
+    .then(data => {
+        res.json({
+            snapshotId: data.body.snapshot_id
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(400);
+    });
+});
+
+app.delete('/:playlist_id/tracks', (req, res) => {
+    const playlistId = req.params.playlist_id;
+
+    const accessToken = req.body.accessToken;
+    const position = req.body.position;
+    const snapshotId = req.body.snapshotId;
+
+    console.log(accessToken);
+    console.log(position);
+    console.log(snapshotId);
+
+    spotifyApi.setAccessToken(accessToken);
+
+    spotifyApi.removeTracksFromPlaylistByPosition(playlistId, [position], snapshotId)
+    .then(data => {
+        res.json({
+            snapshotId: data.body.snapshot_id
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(400);
+    });
+})
+
+app.get('/search', (req, res) => {
+    const accessToken = req.query.accessToken;
+    const search = req.query.search;
+
+    spotifyApi.setAccessToken(accessToken);
+
+    spotifyApi.searchTracks(search)
+    .then(data => {
+        const tracks = [];
+
+        data.body.tracks.items.forEach(item => {
+            pushTracks(tracks, item);
+        });
+        
+        res.json({
+            tracks: tracks
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(400);
+    })
+})
+
+app.post('/personality', async (req, res) => {
+    const accessToken = req.body.accessToken;
+    const artists = req.body.artists;
+
+    spotifyApi.setAccessToken(accessToken);
+
+    genres = !genres ? getGenres() : Promise.resolve(genres);
+    probs = !probs ? getProbs() : Promise.resolve(probs);
+
+    await Promise.all([genres, probs])
+    .then(result => {
+        [genres, probs] = result
+    });
+    const userGenres = [];
+    const promiseArtists = [];
+
+    artists.forEach(artist => {
+        promiseArtists.push(
+            getArtist(artist.id)
+            .then(data => {
+                const artistMainGenre = data.body.genres.reduce((mainGenre, artistGenre) => {
                     genres.every(genre => {
-                        if (genre.subgenres.includes(subgenre)) {
-                            for (const trait in probs.traits) {
-                                user[trait] += probs.personality[genre.name][trait] / lenSubgenres;
+                        let isGenre = false;
+                        genre.subgenres.every(subgenre => {
+                            if (subgenre.name === artistGenre) {
+                                if (!mainGenre || subgenre.distance < mainGenre.distance) {
+                                    mainGenre = {...subgenre, main: genre.name};
+                                }
+                                isGenre = true;
+                                return false;
                             }
-                            return false;
-                        }
-                        return true;
+                            return true;
+                        });
+                        return !isGenre;
                     });
-                });
-
-                let type = "";
-
-                if (user.extraverted > 0.5 || (user.extraverted === 0.5 && probs.traits.extraverted >= 0.5)) {
-                    type += "E";
-                } else {
-                    type += "I";
-                }
-
-                if (user.observant > 0.5 || (user.observant === 0.5 && probs.traits.observant >= 0.5)) {
-                    type += "S";
-                } else {
-                    type += "N"
-                }
-
-                if (user.feeling > 0.5 || (user.feeling === 0.5 && probs.traits.feeling >= 0.5)) {
-                    type += "F";
-                } else {
-                    type += "T";
-                }
-
-                if (user.prospecting > 0.5 || (user.prospecting === 0.5 && probs.traits.prospecting >= 0.5)) {
-                    type += "P";
-                } else {
-                    type += "J";
-                }
-
-                let identity = "";
-
-                if (user.turbulent > 0.5 || (user.turbulent === 0.5 && probs.traits.turbulent >= 0.5)) {
-                    identity = "T";
-                } else {
-                    identity = "A";
-                }
-
-                res.json({
-                    type: type,
-                    identity: identity
-                });
+                    return mainGenre;
+                }, null);
+                userGenres.push(artistMainGenre);
             })
             .catch(err => {
                 console.log(err);
             })
-        })
-        .catch(err => {
-            console.log(err);
-        })
+        );
+    });
+
+    Promise.all(promiseArtists)
+    .then(() => {
+        const user = {
+            extraverted: 0,
+            observant: 0,
+            feeling: 0,
+            prospecting: 0,
+            turbulent: 0
+        };
+
+        const lenGenres = userGenres.length;
+        console.log(lenGenres);
+        userGenres.forEach(genre => {
+            for (const trait in probs.traits) {
+                if (!genre) {
+                    user[trait] += probs.traits[trait] / lenGenres;
+                } else {
+                    user[trait] += probs.personality[genre.main][trait] / lenGenres;
+                }
+            }
+            console.log(user);
+        });
+
+        res.json(user);
     })
     .catch(err => {
         console.log(err);
-    })
+    });
 });
 
 app.listen(3001);
