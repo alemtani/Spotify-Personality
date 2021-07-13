@@ -1,4 +1,16 @@
 .custom-container {
     height: 100vh;
+}
+
+.option-separator {
+    border-bottom: "1px solid black";
+    line-height: "0.1em";
+    margin: "100px 0";
     text-align: center;
+    width: "100%";
+}
+
+.separator-text {
+    background: "white"; 
+    padding: "0 10px";
 }

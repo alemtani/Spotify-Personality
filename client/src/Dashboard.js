@@ -16,7 +16,6 @@ export default function Dashboard({ accessToken }) {
 
     useEffect(() => {
         if (!accessToken) return;
-        console.log(accessToken);
         axios.get('http://localhost:3001/profile', {
             params: {
                 accessToken: accessToken
@@ -95,7 +94,7 @@ export default function Dashboard({ accessToken }) {
 
     if (!chosenPlaylist) {
         return (
-            <Container className="d-flex flex-column py-2" style={{ height: "100vh" }}>
+            <Container className="d-flex flex-column py-2 custom-container">
                 <div>
                     <Profile profile={profile} key={profile.id}/>
                 </div>
@@ -109,7 +108,7 @@ export default function Dashboard({ accessToken }) {
     }
 
     return (
-        <Container className="d-flex flex-column py-2" style={{ height: "100vh" }}>
+        <Container className="d-flex flex-column py-2 custom-container">
             <Playlist accessToken={accessToken} playlist={chosenPlaylist} key={chosenPlaylist.id} />
         </Container>
     )

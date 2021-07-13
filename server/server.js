@@ -246,10 +246,6 @@ app.delete('/:playlist_id/tracks', (req, res) => {
     const position = req.body.position;
     const snapshotId = req.body.snapshotId;
 
-    console.log(accessToken);
-    console.log(position);
-    console.log(snapshotId);
-
     spotifyApi.setAccessToken(accessToken);
 
     spotifyApi.removeTracksFromPlaylistByPosition(playlistId, [position], snapshotId)

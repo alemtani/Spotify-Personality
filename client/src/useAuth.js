@@ -7,6 +7,7 @@ export default function useAuth(code) {
     const [expiresIn, setExpiresIn] = useState();
 
     useEffect(() => {
+        if (!code) return;
         axios.post('http://localhost:3001/login', {
             code,
         })

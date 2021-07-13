@@ -1,10 +1,20 @@
 import { useState, useEffect } from 'react';
 import axios from "axios";
 import axiosRetry from "axios-retry";
+import Access from './Access';
+import {
+    Switch,
+    Route,
+    Link,
+    useRouteMatch
+  } from "react-router-dom";
 
 axiosRetry(axios, { ertryDelay: axiosRetry.exponentialDelay });
 
 export default function Personality({ accessToken, tracks }) {
+    const match = useRouteMatch();
+    console.log(match.path);
+
     const [personality, setPersonality] = useState({
         extraverted: 0,
         observant: 0,
@@ -111,7 +121,14 @@ export default function Personality({ accessToken, tracks }) {
 
     return (
         <div>
-            {personalityType}-{personalityIdentity}
+            <h1>{personalityType}-{personalityIdentity}</h1>
+            <Link to="/">Try Again</Link>
+
+            <Switch>
+                <Route exact path="/">
+                    <Access accessToken={accessToken} />
+                </Route>
+            </Switch>
         </div>
     )
 }
