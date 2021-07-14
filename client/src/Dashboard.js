@@ -4,6 +4,7 @@ import Card from './Card';
 import Playlist from './Playlist';
 import { Container } from 'react-bootstrap';
 import axios from 'axios';
+import {Redirect} from 'react-router-dom';
 
 export default function Dashboard({ accessToken }) {
     const [profile, setProfile] = useState(null);
@@ -108,9 +109,7 @@ export default function Dashboard({ accessToken }) {
     }
 
     return (
-        <Container className="d-flex flex-column py-2 custom-container">
-            <Playlist accessToken={accessToken} playlist={chosenPlaylist} key={chosenPlaylist.id} />
-        </Container>
+        <Redirect to={`/playlists/${chosenPlaylist.id}`} />
     )
     
 }

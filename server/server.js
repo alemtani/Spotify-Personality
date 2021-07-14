@@ -26,6 +26,22 @@ const smallestImage = obj => {
     }, obj.images[0]);
 }
 
+const getPlaylist = (playlist) => {
+    const data = {
+        description: playlist.description,
+        id: playlist.id,
+        name: playlist.name,
+        uri: playlist.uri
+    };
+
+    if (playlist.description) data.description = playlist.description;
+
+    smallestPlaylistImage = smallestImage(playlist);
+    if (smallestPlaylistImage) data.imageUrl = smallestPlaylistImage.url;
+
+    return data;
+}
+
 const pushTracks = (tracks, track) => {
     const data = {
         album: track.album.name,
@@ -144,24 +160,8 @@ app.get('/playlists', (req, res) => {
         offset: offset
     })
     .then(data => {
-        const playlists = [];
-        data.body.items.forEach(item => {
-            const playlist = {
-                description: item.description,
-                id: item.id,
-                name: item.name,
-                tracks: item.tracks,
-                uri: item.uri
-            };
-
-            smallestPlaylistImage = smallestImage(item);
-            if (smallestPlaylistImage) playlist.imageUrl = smallestPlaylistImage.url;
-            
-            playlists.push(playlist)
-        });
-
         res.json({
-            playlists: playlists,
+            playlists: data.body.items.map(item => getPlaylist(item)),
             limit: data.body.limit,
             total: data.body.total
         });
@@ -180,16 +180,33 @@ app.post('/playlists', (req, res) => {
 
     spotifyApi.createPlaylist(name)
     .then(data => {
-        const playlist = {
-            id: data.body.id,
-            name: data.body.name
-        };
-        
-        res.json(playlist);
+        console.log(data.body);
+        res.json(getPlaylist(data.body));
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(400);
     })
 });
 
-app.get('/:playlist_id/tracks', (req, res) => {
+app.get('/playlists/:playlist_id', (req, res) => {
+    const playlistId = req.params.playlist_id;
+
+    const accessToken = req.query.accessToken;
+
+    spotifyApi.setAccessToken(accessToken);
+
+    spotifyApi.getPlaylist(playlistId)
+    .then(data => {
+        res.json(getPlaylist(data.body));
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(400);
+    });
+})
+
+app.get('/playlists/:playlist_id/tracks', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.query.accessToken;
@@ -219,7 +236,7 @@ app.get('/:playlist_id/tracks', (req, res) => {
     });
 });
 
-app.post('/:playlist_id/tracks', (req, res) => {
+app.post('/playlists/:playlist_id/tracks', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.body.accessToken;
@@ -239,7 +256,7 @@ app.post('/:playlist_id/tracks', (req, res) => {
     });
 });
 
-app.delete('/:playlist_id/tracks', (req, res) => {
+app.delete('/playlists/:playlist_id/tracks', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.body.accessToken;

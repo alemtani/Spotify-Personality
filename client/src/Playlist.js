@@ -3,20 +3,26 @@ import Track from './Track';
 import Personality from './Personality';
 import { Container, Form } from 'react-bootstrap';
 import axios from 'axios';
+import { 
+    useRouteMatch,
+    useParams
+} from "react-router-dom"
 
-export default function Playlist({ accessToken, playlist, created }) {
+export default function Playlist({ accessToken, isCreated }) {
     const [analyze, setAnalyze] = useState(false);
+    const [data, setData] = useState(null);
     const [search, setSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [snapshotId, setSnapshotId] = useState('');
-    const [tracks, setTracks] = useState([]);
+    const [snapshotId, setSnapshotId] = useState(null);
+    const [tracks, setTracks] = useState(null);
+    let { playlistId } = useParams();
 
     function handleAnalyze() {
         setAnalyze(true);
     }
 
     function addTrack(track) {
-        axios.post(`http://localhost:3001/${playlist.id}/tracks`, {
+        axios.post(`http://localhost:3001/${playlistId}/tracks`, {
             accessToken: accessToken,
             trackUri: track.uri
         })
@@ -30,10 +36,7 @@ export default function Playlist({ accessToken, playlist, created }) {
     }
 
     function removeTrack(position) {
-        console.log(accessToken);
-        console.log(position);
-        console.log(snapshotId);
-        axios.delete(`http://localhost:3001/${playlist.id}/tracks`, {
+        axios.delete(`http://localhost:3001/${playlistId}/tracks`, {
             data: {
                 accessToken: accessToken,
                 position: position,
@@ -50,14 +53,44 @@ export default function Playlist({ accessToken, playlist, created }) {
     }
 
     useEffect(() => {
-        if (!playlist || !accessToken) return;
+        if (!accessToken || !isCreated) return;
+        axios.post('http://localhost:3001/playlists', {
+            accessToken: accessToken,
+            name: 'My Playlist'
+        })
+        .then(res => {
+            playlistId = res.data.id;
+            console.log(playlistId);
+        })
+        .catch(err => {
+            console.log(err);
+            throw err;
+        });
+    }, [accessToken, isCreated]);
 
-        const playlistId = playlist.id;
+    useEffect(() => {
+        if (!accessToken || !playlistId) return;
+        console.log(playlistId);
+        axios.get(`http://localhost:3001/playlists/${playlistId}`, {
+            params: {
+                accessToken: accessToken
+            }
+        })
+        .then(res => {
+            setData(res.data);
+        })
+        .catch(err => {
+            console.log(err);
+            throw err;
+        });
+    }, [accessToken, playlistId]);
+
+    useEffect(() => {
+        if (!accessToken || !playlistId) return;
         let offset = 0;
-        axios.get(`http://localhost:3001/${playlistId}/tracks`, {
+        axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
             params: {
                 accessToken: accessToken,
-                playlistId: playlistId,
                 offset: offset
             }
         })
@@ -70,10 +103,9 @@ export default function Playlist({ accessToken, playlist, created }) {
             offset += limit;
             while (offset < total) {
                 promiseTracks.push(
-                    axios.get(`http://localhost:3001/${playlistId}/tracks`, {
+                    axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
                         params: {
                             accessToken: accessToken,
-                            playlistId: playlistId,
                             offset: offset
                         }
                     })
@@ -90,7 +122,7 @@ export default function Playlist({ accessToken, playlist, created }) {
 
             Promise.all(promiseTracks)
             .then(() => {
-                setTracks([...newTracks])
+                setTracks([...newTracks]);
             })
             .catch(err => {
                 console.log(err);
@@ -101,7 +133,7 @@ export default function Playlist({ accessToken, playlist, created }) {
             console.log(err);
             throw err;
         });
-    }, [accessToken, playlist, snapshotId]);
+    }, [accessToken, playlistId, snapshotId]);
 
     useEffect(() => {
         if (!accessToken) return;
@@ -126,35 +158,36 @@ export default function Playlist({ accessToken, playlist, created }) {
         return () => cancel = true;
     }, [accessToken, search]);
 
-    useEffect(() => {
-        if (!accessToken) return;
-        if (!tracks) return setTracks([]);
-
-        setTracks(tracks);
-    }, [accessToken, tracks]);
+    if (!data || !tracks) {
+        return (
+            <div>
+                Loading...
+            </div>
+        );
+    }
 
     if (!analyze) {
         return (
             <div>
                 <Container className="d-flex flex-column py-2" style={{height: "100vh"}}>
-                    {playlist.imageUrl && (
-                        <img src={playlist.imageUrl} alt='Playlist' style={{height: "128px", width: "128px"}} />
+                    {data.imageUrl && (
+                        <img src={data.imageUrl} alt='Playlist' style={{height: "128px", width: "128px"}} />
                     )}
-                    <h1>{ playlist.name }</h1>
-                    {playlist.description}
+                    <h1>{ data.name }</h1>
+                    {data.description}
                     <button className="btn btn-success btn-lg" style={{ textAlign: 'center' }} onClick={handleAnalyze}>
                         Analyze
                     </button>
                     <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
                         {tracks.map((track, index) => 
-                            created ? (
+                            isCreated ? (
                                 <Track track={track} position={index + 1} removeTrack={removeTrack} key={index} />
                             ) : (
                                 <Track track={track} position={index + 1} key={index} />
                             )
                         )}
                     </div>
-                    {created && (
+                    {isCreated && (
                         <div>
                             <Form.Control
                                 type="search"

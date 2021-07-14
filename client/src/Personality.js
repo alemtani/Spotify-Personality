@@ -1,20 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import Access from './Access';
 import {
-    Switch,
-    Route,
-    Link,
-    useRouteMatch
+    Redirect
   } from "react-router-dom";
 
 axiosRetry(axios, { ertryDelay: axiosRetry.exponentialDelay });
 
 export default function Personality({ accessToken, tracks }) {
-    const match = useRouteMatch();
-    console.log(match.path);
-
     const [personality, setPersonality] = useState({
         extraverted: 0,
         observant: 0,
@@ -24,11 +17,16 @@ export default function Personality({ accessToken, tracks }) {
     });
     const [personalityType, setPersonalityType] = useState('');
     const [personalityIdentity, setPersonalityIdentity] = useState('');
+    const [redoAnalysis, setRedoAnalysis] = useState(false);
 
     function updatePersonality(current, update, length) {
         for (const trait in current) {
             current[trait] += update[trait] / length;
         }
+    }
+
+    function handleRedoAnalysis() {
+        setRedoAnalysis(true);
     }
 
     useEffect(() => {
@@ -119,16 +117,16 @@ export default function Personality({ accessToken, tracks }) {
         );
     }
 
+    if (redoAnalysis) {
+        return (
+            <Redirect to="/" />
+        )
+    }
+
     return (
         <div>
             <h1>{personalityType}-{personalityIdentity}</h1>
-            <Link to="/">Try Again</Link>
-
-            <Switch>
-                <Route exact path="/">
-                    <Access accessToken={accessToken} />
-                </Route>
-            </Switch>
+            <button onClick={handleRedoAnalysis}>Try Again</button>
         </div>
     )
 }
