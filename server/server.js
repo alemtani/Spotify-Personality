@@ -7,6 +7,8 @@ const {getGenres, getProbs} = require('./crawler');
 
 let genres, probs = null;
 
+let timer = 0;
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -61,7 +63,12 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
-const getArtist = async (artistId, retries) => {
+setInterval(() => {
+    console.log(timer);
+    timer++;
+}, 1000);
+
+const getArtist = async (artistId) => {
     try {
         const data = await spotifyApi.getArtist(artistId);
         return data;
@@ -198,7 +205,10 @@ app.get('/playlists/:playlist_id', (req, res) => {
 
     spotifyApi.getPlaylist(playlistId)
     .then(data => {
-        res.json(getPlaylist(data.body));
+        res.json({
+            playlist: getPlaylist(data.body),
+            snapshotId: data.body.snapshot_id
+        });
     })
     .catch(err => {
         console.log(err);
@@ -307,8 +317,14 @@ app.post('/personality', async (req, res) => {
 
     spotifyApi.setAccessToken(accessToken);
 
-    genres = !genres ? getGenres() : Promise.resolve(genres);
-    probs = !probs ? getProbs() : Promise.resolve(probs);
+    if (!genres || !probs || timer > 86400) {
+        timer = 0;
+        genres = getGenres();
+        probs = getProbs();
+    } else {
+        genres = Promise.resolve(genres);
+        probs = Promise.resolve(probs);
+    }
 
     await Promise.all([genres, probs])
     .then(result => {

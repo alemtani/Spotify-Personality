@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import Login from './Login';
+import About from './About';
 import Access from './Access';
 import Dashboard from './Dashboard';
 import Playlist from './Playlist';
@@ -31,27 +32,27 @@ function App() {
                 <Nav.Link as={Link} to="/">Home</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link as={Link} to="/playlists">Select</Nav.Link>
+                <Nav.Link as={Link} to="/about">About</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link as={Link} to="/playlists/create">Create</Nav.Link>
+                <Nav.Link as={Link} to="/playlists">Dashboard</Nav.Link>
               </Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
 
         <Switch>
-          <Route path="/playlists/create">
-            {accessToken ? <Playlist accessToken={accessToken} isCreated={true} /> : <Redirect to="/login" />}
-          </Route>
           <Route path="/playlists/:playlistId">
-            {accessToken ? <Playlist accessToken={accessToken} isCreated={false} /> : <Redirect to="/login" />}
+            {accessToken ? <Playlist accessToken={accessToken} /> : <Redirect to="/login" />}
           </Route>
           <Route path="/playlists">
             {accessToken ? <Dashboard accessToken={accessToken} /> : <Redirect to="/login" />}
           </Route>
           <Route path="/login">
             {accessToken ? <Redirect to="/" /> : <Login />}
+          </Route>
+          <Route path="/about">
+            <About />
           </Route>
           <Route path="/">
             {accessToken ? <Access accessToken={accessToken} /> : <Redirect to="/login" />}

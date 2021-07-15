@@ -8,12 +8,12 @@ import {
     useParams
 } from "react-router-dom"
 
-export default function Playlist({ accessToken, isCreated }) {
+export default function Playlist({ accessToken }) {
     const [analyze, setAnalyze] = useState(false);
     const [data, setData] = useState(null);
     const [search, setSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [snapshotId, setSnapshotId] = useState(null);
+    const [snapshotId, setSnapshotId] = useState('');
     const [tracks, setTracks] = useState(null);
     let { playlistId } = useParams();
 
@@ -22,7 +22,7 @@ export default function Playlist({ accessToken, isCreated }) {
     }
 
     function addTrack(track) {
-        axios.post(`http://localhost:3001/${playlistId}/tracks`, {
+        axios.post(`http://localhost:3001/playlists/${playlistId}/tracks`, {
             accessToken: accessToken,
             trackUri: track.uri
         })
@@ -36,7 +36,7 @@ export default function Playlist({ accessToken, isCreated }) {
     }
 
     function removeTrack(position) {
-        axios.delete(`http://localhost:3001/${playlistId}/tracks`, {
+        axios.delete(`http://localhost:3001/playlists/${playlistId}/tracks`, {
             data: {
                 accessToken: accessToken,
                 position: position,
@@ -53,22 +53,6 @@ export default function Playlist({ accessToken, isCreated }) {
     }
 
     useEffect(() => {
-        if (!accessToken || !isCreated) return;
-        axios.post('http://localhost:3001/playlists', {
-            accessToken: accessToken,
-            name: 'My Playlist'
-        })
-        .then(res => {
-            playlistId = res.data.id;
-            console.log(playlistId);
-        })
-        .catch(err => {
-            console.log(err);
-            throw err;
-        });
-    }, [accessToken, isCreated]);
-
-    useEffect(() => {
         if (!accessToken || !playlistId) return;
         console.log(playlistId);
         axios.get(`http://localhost:3001/playlists/${playlistId}`, {
@@ -77,7 +61,8 @@ export default function Playlist({ accessToken, isCreated }) {
             }
         })
         .then(res => {
-            setData(res.data);
+            setData(res.data.playlist);
+            setSnapshotId(res.data.snapshotId);
         })
         .catch(err => {
             console.log(err);
@@ -175,33 +160,29 @@ export default function Playlist({ accessToken, isCreated }) {
                     )}
                     <h1>{ data.name }</h1>
                     {data.description}
-                    <button className="btn btn-success btn-lg" style={{ textAlign: 'center' }} onClick={handleAnalyze}>
-                        Analyze
-                    </button>
-                    <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
-                        {tracks.map((track, index) => 
-                            isCreated ? (
-                                <Track track={track} position={index + 1} removeTrack={removeTrack} key={index} />
-                            ) : (
-                                <Track track={track} position={index + 1} key={index} />
-                            )
-                        )}
-                    </div>
-                    {isCreated && (
-                        <div>
-                            <Form.Control
-                                type="search"
-                                placeholder="Search Songs"
-                                value={search} 
-                                onChange={e => setSearch(e.target.value)}
-                            />
-                            <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
-                                {searchResults.map(track => (
-                                    <Track track={track} addTrack={addTrack} key={track.id} />
-                                ))}
-                            </div>
-                        </div>
+                    {tracks.length > 0 && (
+                        <button className="btn btn-success btn-lg" style={{ textAlign: 'center' }} onClick={handleAnalyze}>
+                            Analyze
+                        </button>
                     )}
+                    <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
+                        {tracks.map((track, index) => (
+                            <Track track={track} position={index + 1} removeTrack={removeTrack} key={index} />
+                        ))}
+                    </div>
+                    <div>
+                        <Form.Control
+                            type="search"
+                            placeholder="Search Songs"
+                            value={search} 
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                        <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
+                            {searchResults.map(track => (
+                                <Track track={track} addTrack={addTrack} key={track.id} />
+                            ))}
+                        </div>
+                    </div>
                 </Container>
             </div>
         );
