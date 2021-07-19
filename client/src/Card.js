@@ -1,14 +1,12 @@
-import React from 'react';
-
 export default function Card({ playlist, choosePlaylist }) {
     function handleAnalysis() {
         choosePlaylist(playlist);
     }
 
     return (
-        <div className="d-flex m-2 align-items-center" style={{ cursor: "pointer" }} onClick={handleAnalysis}>
+        <div className="d-flex m-2 align-items-center card" onClick={handleAnalysis}>
             {playlist.imageUrl && (
-                <img src={playlist.imageUrl} alt='Playlist' style={{height: '64px', width: '64px'}} />
+                <img className='sm-img' src={playlist.imageUrl} alt="Playlist" />
             )}
             <div className="ml-3">
                 <div>{playlist.name}</div>

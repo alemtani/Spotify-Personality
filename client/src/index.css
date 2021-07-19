@@ -1,5 +1,18 @@
+.card {
+    cursor: pointer;
+}
+
 .custom-container {
     height: 100vh;
+}
+
+.lg-img {
+    height: 128px;
+    width: 128px;
+}
+
+.list {
+    overflow-y: auto;
 }
 
 .option-separator {
@@ -13,4 +26,9 @@
 .separator-text {
     background: "white"; 
     padding: "0 10px";
+}
+
+.sm-img {
+    height: 64px;
+    width: 64px;
 }

@@ -1,10 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import Login from './Login';
 import About from './About';
 import Access from './Access';
 import Dashboard from './Dashboard';
+import External from './External';
+import Login from './Login';
 import Playlist from './Playlist';
+import Profile from './Profile';
 import useAuth from './useAuth';
 import {
   BrowserRouter as Router,
@@ -12,7 +14,7 @@ import {
   Route,
   Link,
   Redirect
-} from "react-router-dom";
+} from 'react-router-dom';
 import { Navbar, Nav } from 'react-bootstrap';
 
 const code = new URLSearchParams(window.location.search).get('code');
@@ -37,16 +39,25 @@ function App() {
               <Nav.Item>
                 <Nav.Link as={Link} to="/playlists">Dashboard</Nav.Link>
               </Nav.Item>
+              <Nav.Item>
+                <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+              </Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
 
         <Switch>
+          <Route path={`/:type/personality`}>
+            <External />
+          </Route>
           <Route path="/playlists/:playlistId">
             {accessToken ? <Playlist accessToken={accessToken} /> : <Redirect to="/login" />}
           </Route>
           <Route path="/playlists">
             {accessToken ? <Dashboard accessToken={accessToken} /> : <Redirect to="/login" />}
+          </Route>
+          <Route path="/profile">
+            {accessToken ? <Profile accessToken={accessToken} /> : <Redirect to="/login" />}
           </Route>
           <Route path="/login">
             {accessToken ? <Redirect to="/" /> : <Login />}

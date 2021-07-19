@@ -148,7 +148,7 @@ exports.getGenres =  async () => {
 
         genres.forEach(genre => {
             [genre.dimensions.top, genre.dimensions.left] = getDimensions(
-                document.querySelector("[href='engenremap-" + genre.name + ".html']").parentNode.getAttribute('style').split("; ")
+                document.querySelector(`[href='engenremap-${genre.name}.html']`).parentNode.getAttribute('style').split("; ")
             );
         });
         

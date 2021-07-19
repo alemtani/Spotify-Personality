@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
-import Profile from './Profile';
 import Card from './Card';
-import Playlist from './Playlist';
-import { Container } from 'react-bootstrap';
 import axios from 'axios';
-import {Redirect} from 'react-router-dom';
+import { Container } from 'react-bootstrap';
+import { Redirect } from 'react-router-dom';
 
 export default function Dashboard({ accessToken }) {
-    const [profile, setProfile] = useState(null);
-    const [playlists, setPlaylists] = useState(null);
+    const [userId, setUserId] = useState('');
+    const [playlists, setPlaylists] = useState([]);
     const [chosenPlaylist, setChosenPlaylist] = useState(null);
 
     function choosePlaylist(playlist) {
@@ -23,7 +21,7 @@ export default function Dashboard({ accessToken }) {
             }
         })
         .then(res => {
-            setProfile({...res.data});
+            setUserId(res.data.id);
         })
         .catch(err => {
             console.log(err);
@@ -32,9 +30,8 @@ export default function Dashboard({ accessToken }) {
     }, [accessToken]);
 
     useEffect(() => {
-        if (!profile || !accessToken) return;
+        if (!userId || !accessToken) return;
 
-        const userId = profile.id;
         let offset = 0;
         axios.get('http://localhost:3001/playlists', {
             params: {
@@ -48,10 +45,10 @@ export default function Dashboard({ accessToken }) {
             const limit = res.data.limit;
             const total = res.data.total;
 
-            const promisePlaylists = [];
+            const axiosReqs = [];
             offset += limit;
             while (offset < total) {
-                promisePlaylists.push(
+                axiosReqs.push(
                     axios.get('http://localhost:3001/playlists', {
                         params: {
                             accessToken: accessToken,
@@ -59,33 +56,29 @@ export default function Dashboard({ accessToken }) {
                             offset: offset
                         }
                     })
-                    .then(response => {
-                        newPlaylists.push(...response.data.playlists);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        throw err;
-                    })
                 );
                 offset += limit;
             }
 
-            Promise.all(promisePlaylists)
-            .then(() => {
-                setPlaylists([...newPlaylists])
-            })
-            .catch(err => {
-                console.log(err);
-                throw err;
-            })
+            axios.all(axiosReqs)
+            .then(axios.spread((...responses) => {
+                responses.forEach(res => {
+                    newPlaylists.push(...res.data.playlists);
+                });
+                setPlaylists([...newPlaylists]);
+            }))
+            .catch(errors => {
+                console.log(errors);
+                throw errors[0];
+            });
         })
         .catch(err => {
             console.log(err);
             throw err;
         });
-    }, [accessToken, profile]);
+    }, [accessToken, userId]);
 
-    if (!profile || !playlists) {
+    if (!userId || !playlists) {
         return (
             <div>
                 Loading...
@@ -96,10 +89,7 @@ export default function Dashboard({ accessToken }) {
     if (!chosenPlaylist) {
         return (
             <Container className="d-flex flex-column py-2 custom-container">
-                <div>
-                    <Profile profile={profile} key={profile.id}/>
-                </div>
-                <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
+                <div className="flex-grow-1 my-2 list">
                     {playlists.map(playlist => (
                         <Card playlist={playlist} key={playlist.id} choosePlaylist={choosePlaylist} />
                     ))}

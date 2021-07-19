@@ -28,7 +28,7 @@ const smallestImage = obj => {
     }, obj.images[0]);
 }
 
-const getPlaylist = (playlist) => {
+const getPlaylist = playlist => {
     const data = {
         description: playlist.description,
         id: playlist.id,
@@ -59,12 +59,19 @@ const pushTracks = (tracks, track) => {
     tracks.push(data);
 }
 
+const normalize = (distribution) => {
+    for (const variable in distribution) {
+        const total = distribution[variable].true + distribution[variable].false;
+        distribution[variable].true /= total;
+        distribution[variable].false /= total;
+    }
+}
+
 const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
 setInterval(() => {
-    console.log(timer);
     timer++;
 }, 1000);
 
@@ -193,7 +200,7 @@ app.post('/playlists', (req, res) => {
     .catch(err => {
         console.log(err);
         res.sendStatus(400);
-    })
+    });
 });
 
 app.get('/playlists/:playlist_id', (req, res) => {
@@ -231,7 +238,7 @@ app.get('/playlists/:playlist_id/tracks', (req, res) => {
         const tracks = [];
 
         data.body.items.forEach(item => {
-            pushTracks(tracks, item.track);
+            item.track && pushTracks(tracks, item.track);
         });
         
         res.json({
@@ -317,19 +324,21 @@ app.post('/personality', async (req, res) => {
 
     spotifyApi.setAccessToken(accessToken);
 
-    if (!genres || !probs || timer > 86400) {
+    if (!genres || !probs || timer > 300000) {
         timer = 0;
         genres = getGenres();
         probs = getProbs();
-    } else {
-        genres = Promise.resolve(genres);
-        probs = Promise.resolve(probs);
     }
 
     await Promise.all([genres, probs])
     .then(result => {
         [genres, probs] = result
-    });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(500);
+    })
+
     const userGenres = [];
     const promiseArtists = [];
 
@@ -365,30 +374,50 @@ app.post('/personality', async (req, res) => {
     Promise.all(promiseArtists)
     .then(() => {
         const user = {
-            extraverted: 0,
-            observant: 0,
-            feeling: 0,
-            prospecting: 0,
-            turbulent: 0
+            extraverted: {
+                true: 0,
+                false: 0
+            },
+            observant: {
+                true: 0,
+                false: 0
+            },
+            feeling: {
+                true: 0,
+                false: 0
+            },
+            prospecting: {
+                true: 0,
+                false: 0
+            },
+            turbulent: {
+                true: 0,
+                false: 0
+            }
         };
 
         const lenGenres = userGenres.length;
-        console.log(lenGenres);
         userGenres.forEach(genre => {
             for (const trait in probs.traits) {
                 if (!genre) {
-                    user[trait] += probs.traits[trait] / lenGenres;
+                    console.log(probs.traits);
+                    user[trait].true += probs.traits[trait] / lenGenres;
+                    user[trait].false += (1 - probs.traits[trait]) / lenGenres;
                 } else {
-                    user[trait] += probs.personality[genre.main][trait] / lenGenres;
+                    user[trait].true += probs.personality[genre.main][trait] / lenGenres;
+                    user[trait].false += (1 - probs.personality[genre.main][trait]) / lenGenres;
                 }
             }
-            console.log(user);
         });
+
+        normalize(user);
+        console.log(user);
 
         res.json(user);
     })
     .catch(err => {
         console.log(err);
+        res.sendStatus(400);
     });
 });
 

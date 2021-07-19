@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Track({ track, position, addTrack, removeTrack }) {
     const artists = track.artists.map(artist => artist.name).join(', ');
 
@@ -12,9 +10,9 @@ export default function Track({ track, position, addTrack, removeTrack }) {
     }
 
     return (
-        <div className="d-flex m-2 align-items-center" style={{ cursor: "pointer" }}>
+        <div className="d-flex m-2 align-items-center">
             {track.imageUrl && (
-                <img src={track.imageUrl} alt='Track' style={{height: '64px', width: '64px'}} />
+                <img src={track.imageUrl} alt='Track' className="sm-img" />
             )}
             <div className="ml-3">
                 <div>{position}</div>
