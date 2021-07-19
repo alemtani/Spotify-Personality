@@ -8,6 +8,7 @@ import Login from './Login';
 import Playlist from './Playlist';
 import Profile from './Profile';
 import useAuth from './useAuth';
+import logo from './logo.svg';
 import {
   BrowserRouter as Router,
   Switch,
@@ -15,35 +16,47 @@ import {
   Link,
   Redirect
 } from 'react-router-dom';
-import { Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav } from 'react-bootstrap';
 
 const code = new URLSearchParams(window.location.search).get('code');
 
 function App() {
   const accessToken = useAuth(code);
+  console.log(logo);
 
   return (
     <Router>
       <div>
         <Navbar bg="dark" variant="dark" expand="lg">
-          <Navbar.Brand as={Link} to="/">Personality Test</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="mr-auto">
-              <Nav.Item>
-                <Nav.Link as={Link} to="/">Home</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link as={Link} to="/about">About</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link as={Link} to="/playlists">Dashboard</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </Navbar.Collapse>
+          <Container>
+            <Navbar.Brand as={Link} to="/">
+              <img 
+                alt="Spotify"
+                src={logo}
+                width="120"
+                height="120"
+                className="d-inline-block"
+              />{' '}
+              Personality Test
+            </Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="mr-auto">
+                <Nav.Item>
+                  <Nav.Link as={Link} to="/">Home</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link as={Link} to="/about">About</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link as={Link} to="/playlists">Dashboard</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+                </Nav.Item>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
         </Navbar>
 
         <Switch>
