@@ -30,17 +30,17 @@ export default function Access({ accessToken }) {
 
     return (
         <Container className="d-flex justify-content-center align-items-center custom-container">
-            <Button variant="success" as={Link} to="/playlists">
-                Select Playlist
-            </Button>
-            <h2 className="option-separator">
-                <span className="separatorText">
+            <div className="info">
+                <Button variant="success" as={Link} to="/playlists" className="button">
+                    Select Playlist
+                </Button>
+                <div className="header separator">
                     OR
-                </span>
-            </h2>
-            <Button variant="success" onClick={handleCreate}>
-                Create Playlist
-            </Button>
+                </div>
+                <Button variant="success" as={Link} to="/" onClick={handleCreate} className="button">
+                    Create Playlist
+                </Button>
+            </div>
         </Container>
     )
 }

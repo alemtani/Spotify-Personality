@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import Loading from './Loading';
 import Personality from './Personality';
 import Track from './Track';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { Container, Form } from 'react-bootstrap';
+import { Col, Container, Form, Row } from 'react-bootstrap';
 
 export default function Playlist({ accessToken }) {
     const [analyze, setAnalyze] = useState(false);
@@ -106,36 +107,6 @@ export default function Playlist({ accessToken }) {
                 console.log(errors);
                 throw errors[0];
             });
-
-            // const promiseTracks = [];
-            // offset += limit;
-            // while (offset < total) {
-            //     promiseTracks.push(
-            //         axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
-            //             params: {
-            //                 accessToken: accessToken,
-            //                 offset: offset
-            //             }
-            //         })
-            //         .then(response => {
-            //             newTracks.push(...response.data.tracks);
-            //         })
-            //         .catch(err => {
-            //             console.log(err);
-            //             throw err;
-            //         })
-            //     );
-            //     offset += limit;
-            // }
-
-            // Promise.all(promiseTracks)
-            // .then(() => {
-            //     setTracks([...newTracks]);
-            // })
-            // .catch(err => {
-            //     console.log(err);
-            //     throw err;
-            // })
         })
         .catch(err => {
             console.log(err);
@@ -167,27 +138,33 @@ export default function Playlist({ accessToken }) {
     }, [accessToken, search]);
 
     if (!data || !tracks) {
-        return (
-            <div>
-                Loading...
-            </div>
-        );
+        return <Loading />;
     }
 
     if (!analyze) {
         return (
             <div>
                 <Container className="d-flex flex-column py-2 custom-container">
-                    {data.imageUrl && (
-                        <img src={data.imageUrl} alt='Playlist' className="lg-img" />
-                    )}
-                    <h1>{ data.name }</h1>
-                    {data.description}
+                    <Row className="playlist-info-2">
+                        <Col xs={2}>
+                            {data.imageUrl && (
+                                <img src={data.imageUrl} alt='Playlist' className="sm-img" />
+                            )}
+                        </Col>
+                        <Col xs={10}>
+                            <div className="ml-3">
+                                <div className="playlist-title">{ data.name }</div>
+                                <div dangerouslySetInnerHTML={{ __html: data.description }} />
+                            </div>
+                        </Col>
+                    </Row>
                     {tracks.length > 0 && (
                         <button className="btn btn-success btn-lg" onClick={handleAnalyze}>
                             Analyze
                         </button>
                     )}
+                    <div>
+                    </div>
                     <div className="flex-grow-1 my-2 list">
                         {tracks.map((track, index) => (
                             <Track track={track} position={index + 1} removeTrack={removeTrack} key={index} />

@@ -25,4 +25,4 @@ I have decided to public a beta release of my application on GitHub. It will ret
 4. Once you get your personality, you have the option to read more or try again with a different playlist
 
 ## Notes
-- Sometimes when you authenticate with Spotify, you may be stuck on the `/login` page. You may have to wait until Spotify or its API gets their server(s) running again (rip).
+- Sometimes when you authenticate with Spotify, you may get stuck on the `/login` page. You may have to wait until Spotify or its API gets their server(s) running again (rip).

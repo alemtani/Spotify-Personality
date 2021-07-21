@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import Loading from './Loading';
 import axios from 'axios';
+import { Container } from 'react-bootstrap';
 
 export default function Profile({ accessToken }) {
     const [profile, setProfile] = useState(null);
@@ -21,22 +23,18 @@ export default function Profile({ accessToken }) {
     }, [accessToken]);
 
     if (!profile) {
-        return (
-            <div>
-                Loading...
-            </div>
-        )
+        return <Loading />;
     }
 
     return (
-        <div className="d-flex m-2 align-items-center">
+        <Container className="d-flex justify-content-center align-items-center custom-container">
             {profile.imageUrl && (
                 <img src={profile.imageUrl} alt='Profile' className="lg-img" />
             )}
             <div className="ml-3">
-                <div>{profile.displayName}</div>
-                <div className="text-muted">Profile</div>
+                <div className="header">{profile.displayName}</div>
+                <a className="text-muted profile" href={profile.uri}>Profile</a>
             </div>
-        </div>
+        </Container>
     )
 }

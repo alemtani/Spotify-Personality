@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import Card from './Card';
+import Selector from './Selector';
+import Loading from './Loading';
 import axios from 'axios';
-import { Container } from 'react-bootstrap';
+import { Container, Row } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
 
 export default function Dashboard({ accessToken }) {
@@ -79,21 +80,17 @@ export default function Dashboard({ accessToken }) {
     }, [accessToken, userId]);
 
     if (!userId || !playlists) {
-        return (
-            <div>
-                Loading...
-            </div>
-        )
+        return <Loading />;
     }
 
     if (!chosenPlaylist) {
         return (
-            <Container className="d-flex flex-column py-2 custom-container">
-                <div className="flex-grow-1 my-2 list">
+            <Container className="d-flex flex-column py-2">
+                <Row>
                     {playlists.map(playlist => (
-                        <Card playlist={playlist} key={playlist.id} choosePlaylist={choosePlaylist} />
+                        <Selector playlist={playlist} key={playlist.id} choosePlaylist={choosePlaylist} />
                     ))}
-                </div>
+                </Row>
             </Container>
         );
     }

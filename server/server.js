@@ -13,6 +13,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const PORT = process.env.PORT || 3001;
+
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
@@ -59,21 +61,41 @@ const pushTracks = (tracks, track) => {
     tracks.push(data);
 }
 
-const normalize = (distribution) => {
-    for (const variable in distribution) {
-        const total = distribution[variable].true + distribution[variable].false;
-        distribution[variable].true /= total;
-        distribution[variable].false /= total;
-    }
-}
-
 const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
-setInterval(() => {
-    timer++;
-}, 1000);
+const getPlaylists = async (userId, offset) => {
+    try {
+        const data = await spotifyApi.getUserPlaylists(userId, {
+            offset: offset
+        });
+        return data;
+    } catch (err) {
+        if (err.headers && err.headers['retry-after']) {
+            await asyncTimeout(parseInt(err.headers['retry-after']) * 1000);
+            return getPlaylists(userId, offset);
+        }
+        console.log(err);
+        throw err;
+    }
+}
+
+const getTracks = async (playlistId, offset) => {
+    try {
+        const data = await spotifyApi.getPlaylistTracks(playlistId, {
+            offset: offset
+        });
+        return data;
+    } catch (err) {
+        if (err.headers && err.headers['retry-after']) {
+            await asyncTimeout(parseInt(err.headers['retry-after']) * 1000);
+            return getTracks(playlistId, offset);
+        }
+        console.log(err);
+        throw err;
+    }
+}
 
 const getArtist = async (artistId) => {
     try {
@@ -88,6 +110,18 @@ const getArtist = async (artistId) => {
         throw err;
     }
 }
+
+const normalize = (distribution) => {
+    for (const variable in distribution) {
+        const total = distribution[variable].true + distribution[variable].false;
+        distribution[variable].true /= total;
+        distribution[variable].false /= total;
+    }
+}
+
+setInterval(() => {
+    timer++;
+}, 1000);
 
 app.get('/login', (req, res) => {
     const scopes = 'user-read-email user-read-private playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative';
@@ -109,7 +143,8 @@ app.post('/login', (req, res) => {
             refreshToken: data.body.refresh_token,
             expiresIn: data.body.expires_in
         });
-    }).catch(err => {
+    })
+    .catch(err => {
         console.log(err);
         res.sendStatus(400);
     });
@@ -170,9 +205,7 @@ app.get('/playlists', (req, res) => {
 
     spotifyApi.setAccessToken(accessToken);
 
-    spotifyApi.getUserPlaylists(userId, {
-        offset: offset
-    })
+    getPlaylists(userId, offset)
     .then(data => {
         res.json({
             playlists: data.body.items.map(item => getPlaylist(item)),
@@ -231,9 +264,7 @@ app.get('/playlists/:playlist_id/tracks', (req, res) => {
 
     spotifyApi.setAccessToken(accessToken);
 
-    spotifyApi.getPlaylistTracks(playlistId, {
-        offset: offset
-    })
+    getTracks(playlistId, offset)
     .then(data => {
         const tracks = [];
 
@@ -421,4 +452,4 @@ app.post('/personality', async (req, res) => {
     });
 });
 
-app.listen(3001);
+app.listen(PORT);

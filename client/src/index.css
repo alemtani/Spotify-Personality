@@ -1,34 +1,100 @@
+.button {
+    display: block;
+}
+
 .card {
+    height: 100%;
     cursor: pointer;
 }
 
 .custom-container {
     height: 100vh;
+    width: 100vh;
+}
+
+.header {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.info {
+    width: 100%;
+    text-align: center;
+    line-height: 5em;
 }
 
 .lg-img {
-    height: 128px;
-    width: 128px;
+    height: auto;
+    width: 20%;
+    margin: 0 2rem 0 0;
 }
 
 .list {
     overflow-y: auto;
+    height: 25vh;
+}
+
+.logo {
+    max-width: 10%;
+    height: auto;
 }
 
 .option-separator {
-    border-bottom: "1px solid black";
-    line-height: "0.1em";
-    margin: "100px 0";
+    border-bottom: 1px solid black;
+    line-height: 0.1em;
+    margin: 100px 0;
     text-align: center;
-    width: "100%";
+    width: 100%;
 }
 
-.separator-text {
-    background: "white"; 
-    padding: "0 10px";
+.personality {
+    color: black;
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.personality-info {
+    width: 100%;
+    text-align: center;
+    line-height: 3em;
+}
+
+.playlist-info {
+    text-align: center;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+}
+
+.playlist-info-2 {
+    margin-bottom: 1rem;
+}
+
+.playlist-title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.profile {
+    text-decoration: none;
+}
+
+.profile:hover {
+    text-decoration: underline;
+}
+
+.separator {
+    margin: 10%;
+}
+
+.sm-header {
+    font-size: 2rem;
+    font-weight: bold;
 }
 
 .sm-img {
-    height: 64px;
-    width: 64px;
+    height: auto;
+    width: 100%;
 }

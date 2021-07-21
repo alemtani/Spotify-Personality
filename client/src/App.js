@@ -8,7 +8,7 @@ import Login from './Login';
 import Playlist from './Playlist';
 import Profile from './Profile';
 import useAuth from './useAuth';
-import logo from './logo.svg';
+import logo from './logo.jpg';
 import {
   BrowserRouter as Router,
   Switch,
@@ -22,22 +22,19 @@ const code = new URLSearchParams(window.location.search).get('code');
 
 function App() {
   const accessToken = useAuth(code);
-  console.log(logo);
 
   return (
     <Router>
       <div>
-        <Navbar bg="dark" variant="dark" expand="lg">
+        <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
           <Container>
             <Navbar.Brand as={Link} to="/">
               <img 
                 alt="Spotify"
                 src={logo}
-                width="120"
-                height="120"
-                className="d-inline-block"
+                className="d-inline-block logo"
               />{' '}
-              Personality Test
+              Personality
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
