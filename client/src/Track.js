@@ -1,3 +1,4 @@
+import Error from './Error';
 import { Button, Col } from 'react-bootstrap';
 
 export default function Track({ track, position, addTrack, removeTrack }) {

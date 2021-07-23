@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Error from './Error';
 import Loading from './Loading';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -21,6 +22,7 @@ import {
 const interceptorId = rax.attach();
 
 export default function Personality({ accessToken, tracks }) {
+    const [isErr, setIsErr] = useState(false);
     const [personalityType, setPersonalityType] = useState('');
     const [personalityIdentity, setPersonalityIdentity] = useState('');
     const [redoAnalysis, setRedoAnalysis] = useState(false);
@@ -170,9 +172,13 @@ export default function Personality({ accessToken, tracks }) {
         }))
         .catch(errors => {
             console.log(errors);
-            throw errors[0];
+            setIsErr(true);
         });
     }, [accessToken, tracks])
+
+    if (isErr) {
+        return <Error />;
+    }
 
     if (!personalityType || !personalityIdentity) {
         return <Loading />;
@@ -189,9 +195,6 @@ export default function Personality({ accessToken, tracks }) {
             <div className="personality-info">
                 <a href={`https://16personalities.com/${personalityType}/-personality`} className="personality">
                     {personalityType}-{personalityIdentity}
-                    {/* <div className="personality">
-                        {personalityType}-{personalityIdentity}
-                    </div> */}
                 </a>
                 <div className="text-muted">
                     *X=Ambivalent*

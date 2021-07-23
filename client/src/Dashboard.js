@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import Selector from './Selector';
+import Error from './Error';
 import Loading from './Loading';
+import Selector from './Selector';
 import axios from 'axios';
 import { Container, Row } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
 
 export default function Dashboard({ accessToken }) {
+    const [isErr, setIsErr] = useState(false);
     const [userId, setUserId] = useState('');
     const [playlists, setPlaylists] = useState([]);
     const [chosenPlaylist, setChosenPlaylist] = useState(null);
@@ -26,7 +28,7 @@ export default function Dashboard({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }, [accessToken]);
 
@@ -70,14 +72,18 @@ export default function Dashboard({ accessToken }) {
             }))
             .catch(errors => {
                 console.log(errors);
-                throw errors[0];
+                setIsErr(true);
             });
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }, [accessToken, userId]);
+
+    if (isErr) {
+        return <Error />;
+    }
 
     if (!userId || !playlists) {
         return <Loading />;

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import Error from './Error';
 import Loading from './Loading';
 import axios from 'axios';
 import { Container } from 'react-bootstrap';
 
 export default function Profile({ accessToken }) {
+    const [isErr, setIsErr] = useState(false);
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
@@ -18,9 +20,13 @@ export default function Profile({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }, [accessToken]);
+
+    if (isErr) {
+        return <Error />;
+    }
 
     if (!profile) {
         return <Loading />;

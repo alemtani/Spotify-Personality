@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Error from './Error';
 import Loading from './Loading';
 import Personality from './Personality';
 import Track from './Track';
@@ -7,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import { Col, Container, Form, Row } from 'react-bootstrap';
 
 export default function Playlist({ accessToken }) {
+    const [isErr, setIsErr] = useState(false);
     const [analyze, setAnalyze] = useState(false);
     const [data, setData] = useState(null);
     const [search, setSearch] = useState('');
@@ -29,7 +31,7 @@ export default function Playlist({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }
 
@@ -46,7 +48,7 @@ export default function Playlist({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }
 
@@ -63,7 +65,7 @@ export default function Playlist({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }, [accessToken, playlistId]);
 
@@ -110,7 +112,7 @@ export default function Playlist({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
     }, [accessToken, playlistId, snapshotId]);
 
@@ -131,11 +133,15 @@ export default function Playlist({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
 
         return () => cancel = true;
     }, [accessToken, search]);
+
+    if (isErr) {
+        return <Error />;
+    }
 
     if (!data || !tracks) {
         return <Loading />;

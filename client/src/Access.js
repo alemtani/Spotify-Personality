@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Error from './Error';
 import axios from 'axios';
 import {
     Link,
@@ -8,6 +9,7 @@ import {
 import { Button, Container } from 'react-bootstrap';
 
 export default function Access({ accessToken }) {
+    const [isErr, setIsErr] = useState(false);
     const [playlistId, setPlaylistId] = useState('');
 
     function handleCreate() {
@@ -20,8 +22,12 @@ export default function Access({ accessToken }) {
         })
         .catch(err => {
             console.log(err);
-            throw err;
+            setIsErr(true);
         });
+    }
+
+    if (isErr) {
+        return <Error />;
     }
 
     if (playlistId) {
