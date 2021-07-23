@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import Error from './Error';
 import Loading from './Loading';
 import Selector from './Selector';
+import promiseThrottle from './promiseThrottle';
 import axios from 'axios';
 import { Container, Row } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
 
 export default function Dashboard({ accessToken }) {
-    const [isErr, setIsErr] = useState(false);
+    const [error, setError] = useState(null);
     const [userId, setUserId] = useState('');
     const [playlists, setPlaylists] = useState([]);
     const [chosenPlaylist, setChosenPlaylist] = useState(null);
@@ -16,9 +17,9 @@ export default function Dashboard({ accessToken }) {
         setChosenPlaylist(playlist);
     }
 
-    useEffect(() => {
-        if (!accessToken) return;
-        axios.get('http://localhost:3001/profile', {
+    // Need user ID to access playlists in API requests
+    function getUserId() {
+        return axios.get('http://localhost:3001/profile', {
             params: {
                 accessToken: accessToken
             }
@@ -27,16 +28,12 @@ export default function Dashboard({ accessToken }) {
             setUserId(res.data.id);
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
-    }, [accessToken]);
+    }
 
-    useEffect(() => {
-        if (!userId || !accessToken) return;
-
-        let offset = 0;
-        axios.get('http://localhost:3001/playlists', {
+    function getMorePlaylists(offset, playlists) {
+        return axios.get('http://localhost:3001/playlists', {
             params: {
                 accessToken: accessToken,
                 userId: userId,
@@ -44,45 +41,58 @@ export default function Dashboard({ accessToken }) {
             }
         })
         .then(res => {
+            playlists.push(...res.data.playlists);
+        })
+        .catch(err => {
+            setError(err);
+        });
+    }
+
+    function getAllPlaylists() {
+        return axios.get('http://localhost:3001/playlists', {
+            params: {
+                accessToken: accessToken,
+                userId: userId
+            }
+        })
+        .then(res => {
             const newPlaylists = [...res.data.playlists];
             const limit = res.data.limit;
             const total = res.data.total;
 
-            const axiosReqs = [];
-            offset += limit;
+            const promises = [];
+            let offset = limit;
             while (offset < total) {
-                axiosReqs.push(
-                    axios.get('http://localhost:3001/playlists', {
-                        params: {
-                            accessToken: accessToken,
-                            userId: userId,
-                            offset: offset
-                        }
-                    })
-                );
+                const promise = promiseThrottle.add(getMorePlaylists.bind(this, offset, newPlaylists));
+                promises.push(promise);
                 offset += limit;
             }
 
-            axios.all(axiosReqs)
-            .then(axios.spread((...responses) => {
-                responses.forEach(res => {
-                    newPlaylists.push(...res.data.playlists);
-                });
+            Promise.all(promises)
+            .then(() => {
                 setPlaylists([...newPlaylists]);
-            }))
-            .catch(errors => {
-                console.log(errors);
-                setIsErr(true);
-            });
+            })
+            .catch(err => {
+                setError(err);
+            })
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
+    }
+
+    useEffect(() => {
+        if (!accessToken) return;
+        promiseThrottle.add(getUserId.bind(this));
+    }, [accessToken]);
+
+    useEffect(() => {
+        if (!userId || !accessToken) return;
+        promiseThrottle.add(getAllPlaylists.bind(this));
     }, [accessToken, userId]);
 
-    if (isErr) {
-        return <Error />;
+    if (error) {
+        return <Error error={error} />;
     }
 
     if (!userId || !playlists) {

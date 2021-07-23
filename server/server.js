@@ -30,6 +30,7 @@ const smallestImage = obj => {
     }, obj.images[0]);
 }
 
+// Given response body, will generate necessary data back to client
 const getPlaylist = playlist => {
     const data = {
         description: playlist.description,
@@ -65,6 +66,8 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
+// Watch out for 429 errors and automatically retry
+
 const getPlaylists = async (userId, offset) => {
     try {
         const data = await spotifyApi.getUserPlaylists(userId, {
@@ -76,7 +79,6 @@ const getPlaylists = async (userId, offset) => {
             await asyncTimeout(parseInt(err.headers['retry-after']) * 1000);
             return getPlaylists(userId, offset);
         }
-        console.log(err);
         throw err;
     }
 }
@@ -92,25 +94,24 @@ const getTracks = async (playlistId, offset) => {
             await asyncTimeout(parseInt(err.headers['retry-after']) * 1000);
             return getTracks(playlistId, offset);
         }
-        console.log(err);
         throw err;
     }
 }
 
-const getArtist = async (artistId) => {
+const getArtists = async (artistIds) => {
     try {
-        const data = await spotifyApi.getArtist(artistId);
+        const data = await spotifyApi.getArtists(artistIds);
         return data;
     } catch (err) {
         if (err.headers && err.headers['retry-after']) {
             await asyncTimeout(parseInt(err.headers['retry-after']) * 1000);
-            return getArtist(artistId);
+            return getArtists(artistIds);
         }
-        console.log(err);
         throw err;
     }
 }
 
+// If individual variate distributions don't add to 1, make them
 const normalize = (distribution) => {
     for (const variable in distribution) {
         const total = distribution[variable].true + distribution[variable].false;
@@ -119,10 +120,12 @@ const normalize = (distribution) => {
     }
 }
 
+// Will increment every second, determining when application updates scraped data
 setInterval(() => {
     timer++;
 }, 1000);
 
+// Use Spotify authentication for logging in
 app.get('/login', (req, res) => {
     const scopes = 'user-read-email user-read-private playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative';
     res.redirect('https://accounts.spotify.com/authorize' +
@@ -133,6 +136,7 @@ app.get('/login', (req, res) => {
         '&show_dialog=false');
 });
 
+// After retrieving code, post in Spotify API to get access token for API
 app.post('/login', (req, res) => {
     const code = req.body.code;
 
@@ -145,11 +149,11 @@ app.post('/login', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
+// When refreshing token is necessary
 app.post('/refresh', (req, res) => {
     const refreshToken = req.body.refreshToken;
 
@@ -168,8 +172,7 @@ app.post('/refresh', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
@@ -193,8 +196,7 @@ app.get('/profile', (req, res) => {
         res.json(profile);
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
@@ -214,11 +216,11 @@ app.get('/playlists', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
+// For creating a new playlist
 app.post('/playlists', (req, res) => {
     const accessToken = req.body.accessToken;
     const name = req.body.name;
@@ -227,12 +229,10 @@ app.post('/playlists', (req, res) => {
 
     spotifyApi.createPlaylist(name)
     .then(data => {
-        console.log(data.body);
         res.json(getPlaylist(data.body));
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
@@ -251,8 +251,7 @@ app.get('/playlists/:playlist_id', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 })
 
@@ -279,8 +278,7 @@ app.get('/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
@@ -299,8 +297,7 @@ app.post('/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 
@@ -320,8 +317,7 @@ app.delete('/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 })
 
@@ -344,18 +340,19 @@ app.get('/search', (req, res) => {
         });
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     })
 })
 
+// This will calculate the personality distribution (% one trait vs. complement) given 50 tracks and 50 artists
 app.post('/personality', async (req, res) => {
     const accessToken = req.body.accessToken;
-    const artists = req.body.artists;
+    const tracks = req.body.tracks;
 
     spotifyApi.setAccessToken(accessToken);
 
-    if (!genres || !probs || timer > 300000) {
+    // First reset variables if enough time has passed
+    if (!genres || !probs || timer > 86400) {
         timer = 0;
         genres = getGenres();
         probs = getProbs();
@@ -363,47 +360,20 @@ app.post('/personality', async (req, res) => {
 
     await Promise.all([genres, probs])
     .then(result => {
-        [genres, probs] = result
+        [genres, probs] = result;
     })
     .catch(err => {
-        console.log(err);
         res.sendStatus(500);
     })
 
-    const userGenres = [];
-    const promiseArtists = [];
+    const artistIds = tracks.map(track => track.artists[0].id).filter(id => {
+        if (!id) return false;
+        return true;
+    })
 
-    artists.forEach(artist => {
-        promiseArtists.push(
-            getArtist(artist.id)
-            .then(data => {
-                const artistMainGenre = data.body.genres.reduce((mainGenre, artistGenre) => {
-                    genres.every(genre => {
-                        let isGenre = false;
-                        genre.subgenres.every(subgenre => {
-                            if (subgenre.name === artistGenre) {
-                                if (!mainGenre || subgenre.distance < mainGenre.distance) {
-                                    mainGenre = {...subgenre, main: genre.name};
-                                }
-                                isGenre = true;
-                                return false;
-                            }
-                            return true;
-                        });
-                        return !isGenre;
-                    });
-                    return mainGenre;
-                }, null);
-                userGenres.push(artistMainGenre);
-            })
-            .catch(err => {
-                console.log(err);
-            })
-        );
-    });
-
-    Promise.all(promiseArtists)
-    .then(() => {
+    // Used artist IDs to get the corresponding genres for each
+    getArtists(artistIds)
+    .then(data => {
         const user = {
             extraverted: {
                 true: 0,
@@ -427,28 +397,41 @@ app.post('/personality', async (req, res) => {
             }
         };
 
-        const lenGenres = userGenres.length;
-        userGenres.forEach(genre => {
-            for (const trait in probs.traits) {
-                if (!genre) {
-                    console.log(probs.traits);
-                    user[trait].true += probs.traits[trait] / lenGenres;
-                    user[trait].false += (1 - probs.traits[trait]) / lenGenres;
-                } else {
-                    user[trait].true += probs.personality[genre.main][trait] / lenGenres;
-                    user[trait].false += (1 - probs.personality[genre.main][trait]) / lenGenres;
+        const artists = data.body.artists;
+        artists.forEach(artist => {
+            artist.genres.forEach(artistGenre => {
+                // Will see if can find the artist genre in one of the "subgeneres" from the scraped "genres" object
+                let foundMatch = false;
+
+                genres.every(genre => {
+                    genre.subgenres.every(subgenre => {
+                        if (subgenre == artistGenre) {
+                            foundMatch = true;
+                            for (const trait in probs.traits) {
+                                user[trait].true += probs.personality[genre.name][trait] / artists.length / artist.genres.length;
+                                user[trait].false += (1 - probs.personality[genre.name][trait]) / artists.length / artist.genres.length;
+                            }
+                        }
+                        return !foundMatch;
+                    });
+                    return !foundMatch;
+                });
+
+                // If genre was not found, use default distribution
+                if (!foundMatch) {
+                    for (const trait in probs.traits) {
+                        user[trait].true += probs.traits[trait] / artists.length / artist.genres.length;
+                        user[trait].false += (1 - probs.traits[trait]) / artists.length / artist.genres.length;
+                    }
                 }
-            }
+            });
         });
 
         normalize(user);
-        console.log(user);
-
         res.json(user);
     })
     .catch(err => {
-        console.log(err);
-        res.sendStatus(400);
+        res.sendStatus(err.status);
     });
 });
 

@@ -1,10 +1,17 @@
-# Spotify-Personality
+# Spotify Personality
 Determine your personality type based on your playlist
 
-## WORK IN PROGRESS
-I have decided to public a beta release of my application on GitHub. It will return a personality type based on a selected playlist.
+## Final Website URL
 
-## Getting Started for Development
+## Getting Started for Local Development
+### Requirements
+1. Set up a [Spotify for Developers](https://developer.spotify.com/) account.
+2. Build an app and copy the following:
+    - Client ID
+    - Client Secret
+    - Redirect URI (your choice)
+
+### Setup
 1. Clone or download this repository
 2. Run `npm install` under both the `client` and `server`
 3. In your project folder, `cd` to `server`
@@ -26,3 +33,10 @@ I have decided to public a beta release of my application on GitHub. It will ret
 
 ## Notes
 - Sometimes when you authenticate with Spotify, you may get stuck on the `/login` page. You may have to wait until Spotify or its API gets their server(s) running again (rip).
+
+## Sources
+- [Spotify for Developers](https://developer.spotify.com/)
+- [Every Noise at Once](https://everynoise.com/)
+- [16Personalities](https://www.16personalities.com/)
+- [How To Build A Better Spotify With React](https://www.youtube.com/watch?v=Xcet6msf3eE)
+- [How To Use Promise Throttle](https://github.com/JMPerez/spotify-dedup/blob/b6091581e3700ccbb1e5a0e26dbb59422fa3d15f/app/scripts/main.js#L80)

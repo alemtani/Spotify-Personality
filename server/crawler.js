@@ -153,6 +153,7 @@ exports.getGenres =  async () => {
         });
         
         const numGenres = document.querySelector(".canvas").children.length;
+        // For each genre from the website, match it to the closest "main" genre as based on the study in README.md
         for (let i = 1; i <= numGenres; i++) {
             console.log(i);
             const genre = document.querySelector("#item" + i);
@@ -169,7 +170,7 @@ exports.getGenres =  async () => {
             }
 
             genre.removeChild(genre.childNodes[1]);
-            genres[mainGenreIndex].subgenres.push({name: genre.textContent.trim(), distance: minDistance});
+            genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
         }
         return genres;
     } catch (err) {
@@ -182,6 +183,8 @@ exports.getProbs = async () => {
     try {
         const { data } = await axios.get("https://www.16personalities.com/country-profiles/united-states");
         const { document } = new JSDOM(data).window;
+
+        // Probability distributions for each genre taken from https://www.16personalities.com/articles/music-preferences-by-personality-type
 
         const probs = {
             traits: {

@@ -39,14 +39,6 @@
     height: auto;
 }
 
-.option-separator {
-    border-bottom: 1px solid black;
-    line-height: 0.1em;
-    margin: 100px 0;
-    text-align: center;
-    width: 100%;
-}
-
 .personality {
     color: black;
     font-size: 3rem;

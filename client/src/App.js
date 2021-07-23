@@ -3,7 +3,6 @@ import './index.css';
 import About from './About';
 import Access from './Access';
 import Dashboard from './Dashboard';
-import External from './External';
 import Login from './Login';
 import Playlist from './Playlist';
 import Profile from './Profile';
@@ -23,6 +22,8 @@ const code = new URLSearchParams(window.location.search).get('code');
 function App() {
   const accessToken = useAuth(code);
 
+  // Navbar allows navigation across app
+  // Can go to most pages as long as logged in
   return (
     <Router>
       <div>
@@ -57,9 +58,6 @@ function App() {
         </Navbar>
 
         <Switch>
-          <Route path={`/:type/personality`}>
-            <External />
-          </Route>
           <Route path="/playlists/:playlistId">
             {accessToken ? <Playlist accessToken={accessToken} /> : <Redirect to="/login" />}
           </Route>

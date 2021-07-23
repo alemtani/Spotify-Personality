@@ -1,4 +1,3 @@
-import Error from './Error';
 import { Button, Col } from 'react-bootstrap';
 
 export default function Track({ track, position, addTrack, removeTrack }) {
@@ -42,22 +41,6 @@ export default function Track({ track, position, addTrack, removeTrack }) {
                     </Button>
                 )}
             </Col>
-            {/* <div className="ml-3">
-                <Col 
-                
-                <div>{artists}</div>
-                <div>{track.album}</div>
-                {addTrack && (
-                    <button onClick={handleAdd}>
-                        Add
-                    </button>
-                )}
-                {removeTrack && (
-                    <button onClick={handleRemove}>
-                        Remove
-                    </button>
-                )}
-            </div> */}
         </div>
     )
 }

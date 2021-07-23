@@ -1,20 +1,12 @@
 import { Card, Col } from 'react-bootstrap';
 
+// Selector is basically a playlist card selected in the dashboard
 export default function Selector({ playlist, choosePlaylist }) {
     function handleAnalysis() {
         choosePlaylist(playlist);
     }
 
     return (
-        // <div className="d-flex m-auto p-2 align-items-center card" onClick={handleAnalysis}>
-        //     {playlist.imageUrl && (
-        //         <img className='sm-img' src={playlist.imageUrl} alt="Playlist" />
-        //     )}
-        //     <div className="ml-3 playlist-info">
-        //         <div>{playlist.name}</div>
-        //         <div className="text-muted">{playlist.description}</div>
-        //     </div>
-        // </div>
         <Col xs={12} sm={6} lg={3} className="mb-2">
             <Card className="d-flex m-auto p-2 align-items-center card" onClick={handleAnalysis}>
                 {playlist.imageUrl && (

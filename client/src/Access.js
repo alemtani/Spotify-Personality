@@ -9,9 +9,10 @@ import {
 import { Button, Container } from 'react-bootstrap';
 
 export default function Access({ accessToken }) {
-    const [isErr, setIsErr] = useState(false);
+    const [error, setError] = useState(null);
     const [playlistId, setPlaylistId] = useState('');
 
+    // Creates new playlist to access
     function handleCreate() {
         axios.post('http://localhost:3001/playlists', {
             accessToken: accessToken,
@@ -21,13 +22,12 @@ export default function Access({ accessToken }) {
             setPlaylistId(res.data.id);
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
     }
 
-    if (isErr) {
-        return <Error />;
+    if (error) {
+        return <Error error={error}/>;
     }
 
     if (playlistId) {

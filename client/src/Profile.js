@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import Error from './Error';
 import Loading from './Loading';
+import promiseThrottle from './promiseThrottle';
 import axios from 'axios';
 import { Container } from 'react-bootstrap';
 
 export default function Profile({ accessToken }) {
-    const [isErr, setIsErr] = useState(false);
+    const [error, setError] = useState(null);
     const [profile, setProfile] = useState(null);
 
-    useEffect(() => {
-        if (!accessToken) return;
-        axios.get('http://localhost:3001/profile', {
+    function getProfile() {
+        return axios.get('http://localhost:3001/profile', {
             params: {
                 accessToken: accessToken
             }
@@ -19,13 +19,17 @@ export default function Profile({ accessToken }) {
             setProfile({...res.data});
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err)
         });
+    }
+
+    useEffect(() => {
+        if (!accessToken) return;
+        promiseThrottle.add(getProfile.bind(this));
     }, [accessToken]);
 
-    if (isErr) {
-        return <Error />;
+    if (error) {
+        return <Error error={error}/>;
     }
 
     if (!profile) {

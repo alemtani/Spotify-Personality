@@ -22,6 +22,7 @@ export default function useAuth(code) {
         });
     }, [code]);
 
+    // Make sure to update the access token when expires to allow running
     useEffect(() => {
         if (!refreshToken || !expiresIn) return;
         const interval = setInterval(() => {

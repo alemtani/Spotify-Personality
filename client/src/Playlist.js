@@ -3,22 +3,38 @@ import Error from './Error';
 import Loading from './Loading';
 import Personality from './Personality';
 import Track from './Track';
+import promiseThrottle from './promiseThrottle';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Col, Container, Form, Row } from 'react-bootstrap';
 
 export default function Playlist({ accessToken }) {
-    const [isErr, setIsErr] = useState(false);
+    const [error, setError] = useState(null);
     const [analyze, setAnalyze] = useState(false);
     const [data, setData] = useState(null);
     const [search, setSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [snapshotId, setSnapshotId] = useState('');
     const [tracks, setTracks] = useState(null);
-    let { playlistId } = useParams();
+    const { playlistId } = useParams();
 
     function handleAnalyze() {
         setAnalyze(true);
+    }
+
+    function getPlaylist() {
+        return axios.get(`http://localhost:3001/playlists/${playlistId}`, {
+            params: {
+                accessToken: accessToken
+            }
+        })
+        .then(res => {
+            setData(res.data.playlist);
+            setSnapshotId(res.data.snapshotId);
+        })
+        .catch(err => {
+            setError(err);
+        });
     }
 
     function addTrack(track) {
@@ -30,8 +46,7 @@ export default function Playlist({ accessToken }) {
             setSnapshotId(res.data.snapshotId);
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
     }
 
@@ -47,35 +62,30 @@ export default function Playlist({ accessToken }) {
             setSnapshotId(res.data.snapshotId);
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
     }
 
-    useEffect(() => {
-        if (!accessToken || !playlistId) return;
-        axios.get(`http://localhost:3001/playlists/${playlistId}`, {
-            params: {
-                accessToken: accessToken
-            }
-        })
-        .then(res => {
-            setData(res.data.playlist);
-            setSnapshotId(res.data.snapshotId);
-        })
-        .catch(err => {
-            console.log(err);
-            setIsErr(true);
-        });
-    }, [accessToken, playlistId]);
-
-    useEffect(() => {
-        if (!accessToken || !playlistId) return;
-        let offset = 0;
-        axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
+    function getMoreTracks(offset, tracks) {
+        return axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
             params: {
                 accessToken: accessToken,
                 offset: offset
+            }
+        })
+        .then(res => {
+            tracks.push(...res.data.tracks);
+        })
+        .catch(err => {
+            setError(err);
+        });
+    }
+
+    // Get first set of tracks, then more if necessary as above
+    function getAllTracks() {
+        return axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
+            params: {
+                accessToken: accessToken
             }
         })
         .then(res => {
@@ -83,64 +93,60 @@ export default function Playlist({ accessToken }) {
             const limit = res.data.limit;
             const total = res.data.total;
 
-            const axiosReqs = [];
-            offset += limit;
-
+            const promises = [];
+            let offset = limit;
             while (offset < total) {
-                axiosReqs.push(
-                    axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
-                        params: {
-                            accessToken: accessToken,
-                            offset: offset
-                        }
-                    })
-                );
+                const promise = promiseThrottle.add(getMoreTracks.bind(this, offset, newTracks));
+                promises.push(promise);
                 offset += limit;
             }
 
-            axios.all(axiosReqs)
-            .then(axios.spread((...responses) => {
-                responses.forEach(res => {
-                    newTracks.push(...res.data.tracks);
-                });
+            Promise.all(promises)
+            .then(() => {
                 setTracks([...newTracks]);
-            }))
-            .catch(errors => {
-                console.log(errors);
-                throw errors[0];
-            });
+            })
+            .catch(err => {
+                setError(err);
+            })
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
-    }, [accessToken, playlistId, snapshotId]);
+    }
 
-    useEffect(() => {
-        if (!accessToken) return;
-        if (!search) return setSearchResults([]);
-
-        let cancel = false;
-        axios.get('http://localhost:3001/search', {
+    function getSearch(search) {
+        return axios.get('http://localhost:3001/search', {
             params: {
                 accessToken: accessToken,
                 search: search
             }
         })
         .then(res => {
-            if (cancel) return;
             setSearchResults(res.data.tracks);
         })
         .catch(err => {
-            console.log(err);
-            setIsErr(true);
+            setError(err);
         });
+    }
 
-        return () => cancel = true;
+    useEffect(() => {
+        if (!accessToken || !playlistId) return;
+        promiseThrottle.add(getPlaylist.bind(this));
+    }, [accessToken, playlistId]);
+
+    useEffect(() => {
+        if (!accessToken || !playlistId) return;
+        promiseThrottle.add(getAllTracks.bind(this));
+    }, [accessToken, playlistId, snapshotId]);
+
+    useEffect(() => {
+        if (!accessToken) return;
+        if (!search) return setSearchResults([]);
+        promiseThrottle.add(getSearch.bind(this, search));
     }, [accessToken, search]);
 
-    if (isErr) {
-        return <Error />;
+    if (error) {
+        return <Error error={error}/>;
     }
 
     if (!data || !tracks) {
