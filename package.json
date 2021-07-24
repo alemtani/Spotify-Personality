@@ -1,0 +1,25 @@
+{
+  "name": "spotify",
+  "version": "1.0.0",
+  "description": "Determine your personality type based on your playlist",
+  "main": "server/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index.js",
+    "build": "cd client && npm install && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alemtani/Spotify-Personality.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alemtani/Spotify-Personality/issues"
+  },
+  "homepage": "https://github.com/alemtani/Spotify-Personality#readme",
+  "engines": {
+    "node": "14.15.1"
+  }
+}
