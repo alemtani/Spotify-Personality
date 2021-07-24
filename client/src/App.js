@@ -59,22 +59,19 @@ function App() {
 
         <Switch>
           <Route path="/playlists/:playlistId">
-            {accessToken ? <Playlist accessToken={accessToken} /> : <Redirect to="/login" />}
+            {accessToken ? <Playlist accessToken={accessToken} /> : <Redirect to="/" />}
           </Route>
           <Route path="/playlists">
-            {accessToken ? <Dashboard accessToken={accessToken} /> : <Redirect to="/login" />}
+            {accessToken ? <Dashboard accessToken={accessToken} /> : <Redirect to="/" />}
           </Route>
           <Route path="/profile">
-            {accessToken ? <Profile accessToken={accessToken} /> : <Redirect to="/login" />}
-          </Route>
-          <Route path="/login">
-            {accessToken ? <Redirect to="/" /> : <Login />}
+            {accessToken ? <Profile accessToken={accessToken} /> : <Redirect to="/" />}
           </Route>
           <Route path="/about">
             <About />
           </Route>
           <Route path="/">
-            {accessToken ? <Access accessToken={accessToken} /> : <Redirect to="/login" />}
+            {accessToken ? <Access accessToken={accessToken} /> : <Login />}
           </Route>
         </Switch>
       </div>

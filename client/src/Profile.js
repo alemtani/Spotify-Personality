@@ -10,7 +10,7 @@ export default function Profile({ accessToken }) {
     const [profile, setProfile] = useState(null);
 
     function getProfile() {
-        return axios.get('http://localhost:3001/profile', {
+        return axios.get('/api/profile', {
             params: {
                 accessToken: accessToken
             }

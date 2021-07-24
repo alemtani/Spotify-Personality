@@ -14,7 +14,7 @@ export default function Access({ accessToken }) {
 
     // Creates new playlist to access
     function handleCreate() {
-        axios.post('http://localhost:3001/playlists', {
+        axios.post('/api/playlists', {
             accessToken: accessToken,
             name: 'My Playlist'
         })

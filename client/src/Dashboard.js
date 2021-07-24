@@ -19,7 +19,7 @@ export default function Dashboard({ accessToken }) {
 
     // Need user ID to access playlists in API requests
     function getUserId() {
-        return axios.get('http://localhost:3001/profile', {
+        return axios.get('/api/profile', {
             params: {
                 accessToken: accessToken
             }
@@ -33,7 +33,7 @@ export default function Dashboard({ accessToken }) {
     }
 
     function getMorePlaylists(offset, playlists) {
-        return axios.get('http://localhost:3001/playlists', {
+        return axios.get('/api/playlists', {
             params: {
                 accessToken: accessToken,
                 userId: userId,
@@ -49,7 +49,7 @@ export default function Dashboard({ accessToken }) {
     }
 
     function getAllPlaylists() {
-        return axios.get('http://localhost:3001/playlists', {
+        return axios.get('/api/playlists', {
             params: {
                 accessToken: accessToken,
                 userId: userId

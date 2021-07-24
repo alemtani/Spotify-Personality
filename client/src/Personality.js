@@ -19,15 +19,15 @@ export default function Personality({ accessToken, tracks }) {
 
     // Get probability distribution of personality for given set of tracks
     function createPromise(length, tracks, personality) {
-        return axios.post('http://localhost:3001/personality', {
+        return axios.post('/api/personality', {
             accessToken: accessToken,
             tracks: tracks
         })
         .then(res => {
-            const track = res.data;
+            const user = res.data;
             for (const trait in personality) {
-                personality[trait].true += track[trait].true / length;
-                personality[trait].false += track[trait].false / length;
+                personality[trait].true += user[trait].true / length;
+                personality[trait].false += user[trait].false / length;
             }
         })
         .catch(err => {

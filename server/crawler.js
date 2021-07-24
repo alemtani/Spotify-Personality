@@ -155,7 +155,6 @@ exports.getGenres =  async () => {
         const numGenres = document.querySelector(".canvas").children.length;
         // For each genre from the website, match it to the closest "main" genre as based on the study in README.md
         for (let i = 1; i <= numGenres; i++) {
-            console.log(i);
             const genre = document.querySelector("#item" + i);
             [top, left] = getDimensions(genre.getAttribute('style').split("; "));
 
@@ -174,7 +173,6 @@ exports.getGenres =  async () => {
         }
         return genres;
     } catch (err) {
-        console.log(err);
         throw err;
     }
 }
@@ -320,7 +318,6 @@ exports.getProbs = async () => {
         ] = distribution.map(trait => trait / 100);
         return probs;
     } catch (err) {
-        console.log(err);
         throw err;
     }
 }

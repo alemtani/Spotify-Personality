@@ -12,6 +12,10 @@
     width: 100vh;
 }
 
+.group {
+    line-height: 3rem;
+}
+
 .header {
     font-size: 3rem;
     font-weight: bold;

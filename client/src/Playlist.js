@@ -23,7 +23,7 @@ export default function Playlist({ accessToken }) {
     }
 
     function getPlaylist() {
-        return axios.get(`http://localhost:3001/playlists/${playlistId}`, {
+        return axios.get(`/api/playlists/${playlistId}`, {
             params: {
                 accessToken: accessToken
             }
@@ -38,7 +38,7 @@ export default function Playlist({ accessToken }) {
     }
 
     function addTrack(track) {
-        axios.post(`http://localhost:3001/playlists/${playlistId}/tracks`, {
+        axios.post(`/api/playlists/${playlistId}/tracks`, {
             accessToken: accessToken,
             trackUri: track.uri
         })
@@ -51,7 +51,7 @@ export default function Playlist({ accessToken }) {
     }
 
     function removeTrack(position) {
-        axios.delete(`http://localhost:3001/playlists/${playlistId}/tracks`, {
+        axios.delete(`/api/playlists/${playlistId}/tracks`, {
             data: {
                 accessToken: accessToken,
                 position: position,
@@ -67,23 +67,26 @@ export default function Playlist({ accessToken }) {
     }
 
     function getMoreTracks(offset, tracks) {
-        return axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
-            params: {
-                accessToken: accessToken,
-                offset: offset
-            }
-        })
-        .then(res => {
-            tracks.push(...res.data.tracks);
-        })
-        .catch(err => {
-            setError(err);
+        return new Promise((resolve, reject) => {
+            axios.get(`/api/playlists/${playlistId}/tracks`, {
+                params: {
+                    accessToken: accessToken,
+                    offset: offset
+                }
+            })
+            .then(res => {
+                resolve(res.data.tracks);
+            })
+            .catch(err => {
+                setError(err);
+                reject(err);
+            });
         });
     }
 
     // Get first set of tracks, then more if necessary as above
     function getAllTracks() {
-        return axios.get(`http://localhost:3001/playlists/${playlistId}/tracks`, {
+        return axios.get(`/api/playlists/${playlistId}/tracks`, {
             params: {
                 accessToken: accessToken
             }
@@ -102,7 +105,10 @@ export default function Playlist({ accessToken }) {
             }
 
             Promise.all(promises)
-            .then(() => {
+            .then((tracks) => {
+                tracks.forEach(subset => {
+                    newTracks.push(...subset);
+                });
                 setTracks([...newTracks]);
             })
             .catch(err => {
@@ -115,7 +121,7 @@ export default function Playlist({ accessToken }) {
     }
 
     function getSearch(search) {
-        return axios.get('http://localhost:3001/search', {
+        return axios.get('/api/search', {
             params: {
                 accessToken: accessToken,
                 search: search

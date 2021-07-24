@@ -1,6 +1,7 @@
 require('dotenv').config();
 const cors = require('cors');
 const express = require('express');
+const path = require('path');
 const SpotifyWebApi = require('spotify-web-api-node');
 
 const {getGenres, getProbs} = require('./crawler');
@@ -13,6 +14,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Have Node serve the files for our built React app
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+
 const PORT = process.env.PORT || 3001;
 
 const spotifyApi = new SpotifyWebApi({
@@ -20,6 +24,16 @@ const spotifyApi = new SpotifyWebApi({
     clientSecret: process.env.CLIENT_SECRET,
     redirectUri: process.env.REDIRECT_URI
 });
+
+const generateRandomString = length => {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+    for (let i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  };
 
 const smallestImage = obj => {
     if (!obj.images || !Array.isArray(obj.images) || obj.images.length === 0) return null;
@@ -126,18 +140,15 @@ setInterval(() => {
 }, 1000);
 
 // Use Spotify authentication for logging in
-app.get('/login', (req, res) => {
-    const scopes = 'user-read-email user-read-private playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative';
-    res.redirect('https://accounts.spotify.com/authorize' +
-        '?response_type=code' +
-        '&client_id=' + process.env.CLIENT_ID +
-        (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-        '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI) +
-        '&show_dialog=false');
+app.get('/api/login', (req, res) => {
+    const scopes = ['user-read-email', 'user-read-private', 'playlist-modify-public', 'playlist-modify-private', 'playlist-read-private', 'playlist-read-collaborative'];
+    const state = generateRandomString(16);
+    const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+    res.json({authorizeURL});
 });
 
 // After retrieving code, post in Spotify API to get access token for API
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
     const code = req.body.code;
 
     spotifyApi.authorizationCodeGrant(code)
@@ -154,7 +165,7 @@ app.post('/login', (req, res) => {
 });
 
 // When refreshing token is necessary
-app.post('/refresh', (req, res) => {
+app.post('/api/refresh', (req, res) => {
     const refreshToken = req.body.refreshToken;
 
     const refreshSpotifyApi = new SpotifyWebApi({
@@ -176,7 +187,7 @@ app.post('/refresh', (req, res) => {
     });
 });
 
-app.get('/profile', (req, res) => {
+app.get('/api/profile', (req, res) => {
     const accessToken = req.query.accessToken;
 
     spotifyApi.setAccessToken(accessToken);
@@ -200,7 +211,7 @@ app.get('/profile', (req, res) => {
     });
 });
 
-app.get('/playlists', (req, res) => {
+app.get('/api/playlists', (req, res) => {
     const accessToken = req.query.accessToken;
     const userId = req.query.userId;
     const offset = req.query.offset;
@@ -221,7 +232,7 @@ app.get('/playlists', (req, res) => {
 });
 
 // For creating a new playlist
-app.post('/playlists', (req, res) => {
+app.post('/api/playlists', (req, res) => {
     const accessToken = req.body.accessToken;
     const name = req.body.name;
 
@@ -236,7 +247,7 @@ app.post('/playlists', (req, res) => {
     });
 });
 
-app.get('/playlists/:playlist_id', (req, res) => {
+app.get('/api/playlists/:playlist_id', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.query.accessToken;
@@ -255,7 +266,7 @@ app.get('/playlists/:playlist_id', (req, res) => {
     });
 })
 
-app.get('/playlists/:playlist_id/tracks', (req, res) => {
+app.get('/api/playlists/:playlist_id/tracks', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.query.accessToken;
@@ -282,7 +293,7 @@ app.get('/playlists/:playlist_id/tracks', (req, res) => {
     });
 });
 
-app.post('/playlists/:playlist_id/tracks', (req, res) => {
+app.post('/api/playlists/:playlist_id/tracks', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.body.accessToken;
@@ -301,7 +312,7 @@ app.post('/playlists/:playlist_id/tracks', (req, res) => {
     });
 });
 
-app.delete('/playlists/:playlist_id/tracks', (req, res) => {
+app.delete('/api/playlists/:playlist_id/tracks', (req, res) => {
     const playlistId = req.params.playlist_id;
 
     const accessToken = req.body.accessToken;
@@ -321,7 +332,7 @@ app.delete('/playlists/:playlist_id/tracks', (req, res) => {
     });
 })
 
-app.get('/search', (req, res) => {
+app.get('/api/search', (req, res) => {
     const accessToken = req.query.accessToken;
     const search = req.query.search;
 
@@ -345,7 +356,7 @@ app.get('/search', (req, res) => {
 })
 
 // This will calculate the personality distribution (% one trait vs. complement) given 50 tracks and 50 artists
-app.post('/personality', async (req, res) => {
+app.post('/api/personality', async (req, res) => {
     const accessToken = req.body.accessToken;
     const tracks = req.body.tracks;
 
@@ -434,5 +445,10 @@ app.post('/personality', async (req, res) => {
         res.sendStatus(err.status);
     });
 });
+
+// All other GET requests not handled before will return our React app
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+  });
 
 app.listen(PORT);

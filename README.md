@@ -40,3 +40,5 @@ Determine your personality type based on your playlist
 - [16Personalities](https://www.16personalities.com/)
 - [How To Build A Better Spotify With React](https://www.youtube.com/watch?v=Xcet6msf3eE)
 - [How To Use Promise Throttle](https://github.com/JMPerez/spotify-dedup/blob/b6091581e3700ccbb1e5a0e26dbb59422fa3d15f/app/scripts/main.js#L80)
+- [Authorization Code - State](https://github.com/spotify/web-api-auth-examples)
+- [React with Node Backend - Deployment](https://www.freecodecamp.org/news/how-to-create-a-react-app-with-a-node-backend-the-complete-guide/)
