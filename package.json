@@ -21,5 +21,14 @@
   "homepage": "https://github.com/alemtani/Spotify-Personality#readme",
   "engines": {
     "node": "14.15.1"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsdom": "^16.6.0",
+    "path": "^0.12.7",
+    "spotify-web-api-node": "^5.0.2"
   }
 }
