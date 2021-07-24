@@ -16,6 +16,14 @@
     line-height: 3rem;
 }
 
+.group .text-muted ul {
+    list-style-position: inside;
+}
+
+.group .text-muted ul li {
+    text-align: left;
+}
+
 .header {
     font-size: 3rem;
     font-weight: bold;

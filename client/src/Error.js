@@ -9,10 +9,10 @@ export default function Error({ error }) {
         <Container className="d-flex justify-content-center align-items-center custom-container">
             <div className="info">
                 <div className="header">
-                    {error.status ? error.status : error.message}
+                    {error.statusCode ? error.statusCode : error.message}
                 </div>
                 <div>
-                    {error.status && error.message}
+                    {error.statusCode && error.message}
                 </div>
                 <Button variant="primary" onClick={handleBack}>
                     Go Back

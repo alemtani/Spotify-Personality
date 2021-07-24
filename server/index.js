@@ -160,7 +160,7 @@ app.post('/api/login', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -183,7 +183,7 @@ app.post('/api/refresh', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -207,7 +207,7 @@ app.get('/api/profile', (req, res) => {
         res.json(profile);
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -227,7 +227,7 @@ app.get('/api/playlists', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -243,7 +243,7 @@ app.post('/api/playlists', (req, res) => {
         res.json(getPlaylist(data.body));
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -262,7 +262,7 @@ app.get('/api/playlists/:playlist_id', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 })
 
@@ -289,7 +289,7 @@ app.get('/api/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -308,7 +308,7 @@ app.post('/api/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 
@@ -328,7 +328,7 @@ app.delete('/api/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 })
 
@@ -351,7 +351,7 @@ app.get('/api/search', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     })
 })
 
@@ -442,7 +442,7 @@ app.post('/api/personality', async (req, res) => {
         res.json(user);
     })
     .catch(err => {
-        res.sendStatus(err.status);
+        res.sendStatus(err.statusCode);
     });
 });
 

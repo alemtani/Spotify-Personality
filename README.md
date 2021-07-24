@@ -4,6 +4,8 @@ Determine your personality type based on your playlist
 ## Final Website URL
 https://spotify-personality-test.herokuapp.com/
 
+### Disclaimer: If you want to use this site email me alemtani@gmail.com. It will not work properly because I have to manually add users for this developmental site.
+
 ## Getting Started for Local Development
 ### Requirements
 1. Set up a [Spotify for Developers](https://developer.spotify.com/) account.
