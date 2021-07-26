@@ -7,8 +7,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 
 // const {getGenres, getProbs} = require('./crawler');
 
-// let genres = null;
-// let probs = null;
+let genres, probs = null;
 
 // let timer = 0;
 
@@ -171,7 +170,7 @@ app.post('/api/login', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -194,7 +193,7 @@ app.post('/api/refresh', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -218,7 +217,7 @@ app.get('/api/profile', (req, res) => {
         res.json(profile);
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -238,7 +237,7 @@ app.get('/api/playlists', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -254,7 +253,7 @@ app.post('/api/playlists', (req, res) => {
         res.json(getPlaylist(data.body));
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -273,7 +272,7 @@ app.get('/api/playlists/:playlist_id', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 })
 
@@ -300,7 +299,7 @@ app.get('/api/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -319,7 +318,7 @@ app.post('/api/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
@@ -339,7 +338,7 @@ app.delete('/api/playlists/:playlist_id/tracks', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 })
 
@@ -362,7 +361,7 @@ app.get('/api/search', (req, res) => {
         });
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     })
 })
 
@@ -380,7 +379,11 @@ app.post('/api/personality', async (req, res) => {
     //     probs = getProbs();
     // }
 
-    const { genres, probs } = await workQueue.add();
+    if (!genres || !probs) {
+        ({ genres, probs } = await workQueue.add());
+    }
+
+    // const { genres, probs } = await workQueue.add();
 
     // await Promise.all([genres, probs])
     // .then(result => {
@@ -455,7 +458,7 @@ app.post('/api/personality', async (req, res) => {
         res.json(user);
     })
     .catch(err => {
-        res.sendStatus(err.statusCode);
+        res.sendStatus(err.statusCode || 500);
     });
 });
 
