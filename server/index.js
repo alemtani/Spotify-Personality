@@ -84,7 +84,7 @@ const asyncTimeout = async (timeout) => {
 workQueue.add();
 
 workQueue.on('global:completed', (jobId, result) => {
-    console.log(result);
+    console.log(`Job with id ${jobId} completed with result ${result}`);
     [genres, probs] = result;
 })
 
@@ -443,6 +443,7 @@ app.post('/api/personality', async (req, res) => {
             res.json(user);
         })
         .catch(err => {
+            console.log(err);
             res.sendStatus(err.statusCode || 500);
         });
     });

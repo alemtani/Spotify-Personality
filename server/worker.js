@@ -21,13 +21,9 @@ function start() {
   let workQueue = new Queue('work', REDIS_URL);
 
   workQueue.process(maxJobsPerWorker, async (job) => {
-    Promise.all([getGenres(job), getProbs()])
-    .then(data => {
-        return data;
-    })
-    .catch(err => {
-        throw err;
-    })
+    const [genres, probs] = await Promise.all([getGenres(), getProbs()]);
+    console.log('Finished processing');
+    return [genres, probs];
   });
 }
 
