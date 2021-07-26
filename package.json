@@ -24,11 +24,14 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "bull": "^3.26.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsdom": "^16.6.0",
     "path": "^0.12.7",
-    "spotify-web-api-node": "^5.0.2"
+    "redis": "^3.1.2",
+    "spotify-web-api-node": "^5.0.2",
+    "throng": "^5.0.0"
   }
 }

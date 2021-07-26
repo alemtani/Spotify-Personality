@@ -2,12 +2,13 @@ require('dotenv').config();
 const cors = require('cors');
 const express = require('express');
 const path = require('path');
+const Queue = require('bull');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-const {getGenres, getProbs} = require('./crawler');
+// const {getGenres, getProbs} = require('./crawler');
 
-let genres = getGenres();
-let probs = getProbs();
+// let genres = null;
+// let probs = null;
 
 // let timer = 0;
 
@@ -19,6 +20,10 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, '../client/build')));
 
 const PORT = process.env.PORT || 3001;
+
+let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+
+let workQueue = new Queue('work', REDIS_URL);
 
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
@@ -375,13 +380,15 @@ app.post('/api/personality', async (req, res) => {
     //     probs = getProbs();
     // }
 
-    await Promise.all([genres, probs])
-    .then(result => {
-        [genres, probs] = result;
-    })
-    .catch(err => {
-        res.sendStatus(500);
-    })
+    const { genres, probs } = await workQueue.add();
+
+    // await Promise.all([genres, probs])
+    // .then(result => {
+    //     [genres, probs] = result;
+    // })
+    // .catch(err => {
+    //     res.sendStatus(500);
+    // })
 
     const artistIds = tracks.map(track => track.artists[0].id).filter(id => {
         if (!id) return false;
