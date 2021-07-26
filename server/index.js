@@ -5,12 +5,6 @@ const path = require('path');
 const Queue = require('bull');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-// const {getGenres, getProbs} = require('./crawler');
-
-let genres, probs = null;
-
-// let timer = 0;
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -23,6 +17,8 @@ const PORT = process.env.PORT || 3001;
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
 let workQueue = new Queue('work', REDIS_URL);
+
+let genres, probs = null;
 
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
@@ -85,6 +81,12 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
+workQueue.add();
+
+workQueue.on('global:completed', (jobId, result) => {
+    [genres, probs] = result;
+})
+
 // Watch out for 429 errors and automatically retry
 
 const getPlaylists = async (userId, offset) => {
@@ -128,26 +130,6 @@ const getArtists = async (artistIds) => {
         }
         throw err;
     }
-}
-
-const scrapeData = async () => {
-    if (!genres || !probs) {
-        return await workQueue.add();
-        // .then(data => { 
-        //     console.log(data);
-        //     return data;
-        // })
-        // .catch(err => {
-        //     console.log(err);
-        //     throw err;
-        // });
-        workQueue.on('completed', (job, result) => {
-            console.log(`Job completed with result ${result}`);
-            return result;
-        })
-    }
-    return [genres, probs];
-    // return [genres, probs];
 }
 
 // If individual variate distributions don't add to 1, make them
@@ -392,30 +374,9 @@ app.post('/api/personality', async (req, res) => {
 
     spotifyApi.setAccessToken(accessToken);
 
-    // First reset variables if enough time has passed
-    // if (!genres || !probs || timer > 86400) {
-    //     timer = 0;
-    //     genres = getGenres();
-    //     probs = getProbs();
-    // }
-
-    if (!genres || !probs) {
-        [genres, probs] = await workQueue.add();
-    }
-
-    // const { genres, probs } = await workQueue.add();
-
-    // await Promise.all([genres, probs])
-    // .then(result => {
-    //     [genres, probs] = result;
-    // })
-    // .catch(err => {
-    //     res.sendStatus(500);
-    // })
-
-    workQueue.on('global:completed', (jobId, result) => {
-        console.log(`Job completed with result ${result}`);
-        [genres, probs] = result;
+    Promise.all([genres, probs])
+    .then(data => {
+        [genres, probs] = data;
         const artistIds = tracks.map(track => track.artists[0].id).filter(id => {
             if (!id) return false;
             return true;
@@ -481,88 +442,9 @@ app.post('/api/personality', async (req, res) => {
             res.json(user);
         })
         .catch(err => {
-            console.log(err);
             res.sendStatus(err.statusCode || 500);
         });
-    })
-
-    // scrapeData()
-    // .then(data => {
-    //     console.log('Finally returned data:', data);
-    //     [genres, probs] = data;
-    //     const artistIds = tracks.map(track => track.artists[0].id).filter(id => {
-    //         if (!id) return false;
-    //         return true;
-    //     })
-    
-    //     // Used artist IDs to get the corresponding genres for each
-    //     getArtists(artistIds)
-    //     .then(data => {
-    //         const user = {
-    //             extraverted: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             observant: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             feeling: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             prospecting: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             turbulent: {
-    //                 true: 0,
-    //                 false: 0
-    //             }
-    //         };
-    
-    //         const artists = data.body.artists;
-    //         artists.forEach(artist => {
-    //             artist.genres.forEach(artistGenre => {
-    //                 // Will see if can find the artist genre in one of the "subgeneres" from the scraped "genres" object
-    //                 let foundMatch = false;
-    
-    //                 genres.every(genre => {
-    //                     genre.subgenres.every(subgenre => {
-    //                         if (subgenre == artistGenre) {
-    //                             foundMatch = true;
-    //                             for (const trait in probs.traits) {
-    //                                 user[trait].true += probs.personality[genre.name][trait] / artists.length / artist.genres.length;
-    //                                 user[trait].false += (1 - probs.personality[genre.name][trait]) / artists.length / artist.genres.length;
-    //                             }
-    //                         }
-    //                         return !foundMatch;
-    //                     });
-    //                     return !foundMatch;
-    //                 });
-    
-    //                 // If genre was not found, use default distribution
-    //                 if (!foundMatch) {
-    //                     for (const trait in probs.traits) {
-    //                         user[trait].true += probs.traits[trait] / artists.length / artist.genres.length;
-    //                         user[trait].false += (1 - probs.traits[trait]) / artists.length / artist.genres.length;
-    //                     }
-    //                 }
-    //             });
-    //         });
-    
-    //         normalize(user);
-    //         res.json(user);
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.sendStatus(err.statusCode || 500);
-    //     });
-    // })
-    // .catch(err => {
-    //     console.log(err);
-    //     res.sendStatus(err.statusCode || 500);
-    // })
+    });
 });
 
 // All other GET requests not handled before will return our React app
