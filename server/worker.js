@@ -16,6 +16,30 @@ let workers = process.env.WEB_CONCURRENCY || 2;
 // to be much lower.
 let maxJobsPerWorker = 50;
 
+// workQueue.process(async (job) => {
+//     // This is an example job that just slowly reports on progress
+//     // while doing no work. Replace this with your own job logic.
+//     // let progress = 0;
+//     console.log(job.id);
+
+//     // const genres = await getGenres(job);
+//     // const probs = await getProbs();
+
+//     // console.log(probs);
+
+//     // A job can return values that will be stored in Redis as JSON
+//     // This return value is unused in this demo application.
+//     Promise.all([getGenres(job), getProbs()])
+//     .then(data => {
+//         console.log('hello');
+//         return data;
+//     })
+//     .catch(err => {
+//         console.log(err);
+//         throw err;
+//     });
+// })
+
 function start() {
   // Connect to the named work queue
   let workQueue = new Queue('work', REDIS_URL);
@@ -25,13 +49,24 @@ function start() {
     // This is an example job that just slowly reports on progress
     // while doing no work. Replace this with your own job logic.
     // let progress = 0;
+    console.log(job.id);
 
-    const genres = await getGenres(job);
-    const probs = await getProbs();
+    // const genres = await getGenres(job);
+    // const probs = await getProbs();
+
+    // console.log(probs);
 
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
-    return { genres, probs };
+    Promise.all([getGenres(job), getProbs()])
+    .then(data => {
+        console.log('hello');
+        return data;
+    })
+    .catch(err => {
+        console.log(err);
+        throw err;
+    })
   });
 }
 

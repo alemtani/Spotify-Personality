@@ -170,6 +170,7 @@ exports.getGenres =  async (job) => {
 
             genre.removeChild(genre.childNodes[1]);
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
+            console.log(i);
             job.progress(i);
         }
         return genres;
