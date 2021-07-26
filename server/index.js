@@ -6,9 +6,10 @@ const SpotifyWebApi = require('spotify-web-api-node');
 
 const {getGenres, getProbs} = require('./crawler');
 
-let genres, probs = null;
+let genres = getGenres();
+let probs = getProbs();
 
-let timer = 0;
+// let timer = 0;
 
 const app = express();
 app.use(cors());
@@ -135,9 +136,14 @@ const normalize = (distribution) => {
 }
 
 // Will increment every second, determining when application updates scraped data
+// setInterval(() => {
+//     timer++;
+// }, 1000);
+
 setInterval(() => {
-    timer++;
-}, 1000);
+    genres = getGenres();
+    probs = getProbs();
+}, 1000*86400*7);
 
 // Use Spotify authentication for logging in
 app.get('/api/login', (req, res) => {
@@ -363,11 +369,11 @@ app.post('/api/personality', async (req, res) => {
     spotifyApi.setAccessToken(accessToken);
 
     // First reset variables if enough time has passed
-    if (!genres || !probs || timer > 86400) {
-        timer = 0;
-        genres = getGenres();
-        probs = getProbs();
-    }
+    // if (!genres || !probs || timer > 86400) {
+    //     timer = 0;
+    //     genres = getGenres();
+    //     probs = getProbs();
+    // }
 
     await Promise.all([genres, probs])
     .then(result => {

@@ -14,7 +14,7 @@ export default function About() {
                         <ul>
                             <li>This is a third party site in development mode and is not in any way associated with Spotify.</li>
                             <li>Because this is in development mode, email me at <a href="mailto: alemtani@gmail.com">alemtani@gmail.com</a> to use this site.</li>
-                            <li>Be willing to wait at least a couple minutes for results (especially when dealing with long playlists).</li>
+                            <li>If the server crashes (i.e. status 503), wait at least a couple of minutes before restarting the application and trying again.</li>
                         </ul>
                     </div>
                 </div>
