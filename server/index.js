@@ -109,7 +109,10 @@ workQueue.on('global:completed', function (jobId, result) {
 
     workQueue.getJob(jobId)
     .then(job => {
+        console.log(job.data);
         ({genres, probs} = job.data);
+        console.log(genres);
+        console.log(probs);
         job.remove();
     })
     .catch(err => {
