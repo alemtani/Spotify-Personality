@@ -105,10 +105,7 @@ const asyncTimeout = async (timeout) => {
 // });
 
 workQueue.on('global:completed', (jobId, result)  => {
-    console.log(result);
-    [genres, probs] = result;
-    console.log(genres);
-    console.log(probs);
+    [genres, probs] = JSON.parse(result);
 
     workQueue.getJob(jobId)
     .then(job => {
@@ -119,10 +116,10 @@ workQueue.on('global:completed', (jobId, result)  => {
     })
 });
 
-workQueue.on('global:failed', (jobId, err) => {
-    // A job failed with reason `err`!
-    console.log(`Job ${jobId} failed with reason ${err}`);
-});
+// workQueue.on('global:failed', (jobId, err) => {
+//     // A job failed with reason `err`!
+//     console.log(`Job ${jobId} failed with reason ${err}`);
+// });
 
 // workQueue.on('global:paused', () => {
 //     // The queue has been paused.
