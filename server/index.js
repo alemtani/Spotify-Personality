@@ -83,77 +83,72 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
-workQueue.on('global:error', function(error) {
-    console.log(`Error occured ${error}`);
-})
+// workQueue.on('global:error', (error) => {
+//     console.log(`Error occured ${error}`);
+// })
 
-workQueue.on('global:waiting', function(jobId){
-   console.log(`Waiting for job ${jobId}`);
-});
+// workQueue.on('global:waiting', (jobId) => {
+//    console.log(`Waiting for job ${jobId}`);
+// });
 
-workQueue.on('global:active', function(jobId, jobPromise){
-    console.log(`Job ${jobId} is active with promise ${jobPromise}`)
-})
+// workQueue.on('global:active', (jobId, jobPromise) =>{
+//     console.log(`Job ${jobId} is active with promise ${jobPromise}`)
+// })
 
-workQueue.on('global:stalled', function(jobId){
-    console.log(`Job ${jobId} has stalled`);
-})
+// workQueue.on('global:stalled', (jobId) => {
+//     console.log(`Job ${jobId} has stalled`);
+// })
 
-// Local events pass the job instance...
-workQueue.on('global:progress', function (jobId, progress) {
-    console.log(`Job ${jobId} is ${progress}% ready!`);
-});
+// // Local events pass the job instance...
+// workQueue.on('global:progress', (jobId, progress) => {
+//     console.log(`Job ${jobId} is ${progress}% ready!`);
+// });
 
-workQueue.on('global:completed', function (jobId, result) {
-    console.log(`Job ${jobId} completed! Result: ${result}`);
+workQueue.on('global:completed', (jobId, result)  => {
+    [genres, probs] = result;
 
     workQueue.getJob(jobId)
     .then(job => {
-        console.log(job.data);
-        ({genres, probs} = job.data);
-        console.log(genres);
-        console.log(probs);
         job.remove();
     })
     .catch(err => {
-        console.log(err);
         throw err;
     })
 });
 
-workQueue.on('global:failed', function(jobId, err){
+workQueue.on('global:failed', (jobId, err) => {
     // A job failed with reason `err`!
     console.log(`Job ${jobId} failed with reason ${err}`);
 });
 
-workQueue.on('global:paused', function(){
-    // The queue has been paused.
-    console.log('Queue has been paused');
-});
+// workQueue.on('global:paused', () => {
+//     // The queue has been paused.
+//     console.log('Queue has been paused');
+// });
 
-workQueue.on('global:resumed', function(job){
-    // The queue has been resumed.
-    console.log('Queue has been resumed');
-});
+// workQueue.on('global:resumed', () => {
+//     // The queue has been resumed.
+//     console.log('Queue has been resumed');
+// });
 
-workQueue.on('global:cleaned', function(jobs, type) {
-    // Old jobs have been cleaned from the queue. `jobs` is an array of cleaned
-    // jobs, and `type` is the type of jobs cleaned.
-    console.log(`Jobs that have been cleaned are of type ${type}`);
-    jobs.forEach(job => {
-        console.log(job.id);
-    })
-});
+// workQueue.on('global:cleaned', (jobs, type) => {
+//     // Old jobs have been cleaned from the queue. `jobs` is an array of cleaned
+//     // jobs, and `type` is the type of jobs cleaned.
+//     console.log(`Jobs that have been cleaned are of type ${type}`);
+//     jobs.forEach(job => {
+//         console.log(job.id);
+//     })
+// });
 
-workQueue.on('global:drained', function() {
-    // Emitted every time the queue has processed all the waiting jobs (even if there can be some delayed jobs not yet processed)
-    console.log('Queue has processed all waiting jobs');
-});
+// workQueue.on('global:drained', () => {
+//     // Emitted every time the queue has processed all the waiting jobs (even if there can be some delayed jobs not yet processed)
+//     console.log('Queue has processed all waiting jobs');
+// });
 
-workQueue.on('global:removed', function(jobId){
-    // A job successfully removed.
-    console.log(`Job ${jobId} successfully removed`);
-});
+// workQueue.on('global:removed', (jobId) => {
+//     // A job successfully removed.
+//     console.log(`Job ${jobId} successfully removed`);
+// });
 
 // Watch out for 429 errors and automatically retry
 
@@ -208,16 +203,6 @@ const normalize = (distribution) => {
         distribution[variable].false /= total;
     }
 }
-
-// Will increment every second, determining when application updates scraped data
-// setInterval(() => {
-//     timer++;
-// }, 1000);
-
-// setInterval(() => {
-//     genres = getGenres();
-//     probs = getProbs();
-// }, 1000*86400*7);
 
 // Use Spotify authentication for logging in
 app.get('/api/login', (req, res) => {
