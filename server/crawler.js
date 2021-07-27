@@ -4,14 +4,7 @@ const axios = require('axios');
 module.exports = async (job) => {
     await Promise.all([getGenres(job), getProbs()])
     .then(data => {
-        const [genres, probs] = data;
-
-        job.data = {
-            genres: genres,
-            probs: probs
-        };
-
-        return Promise.resolve(job.data);
+        return data;
     })
     .catch(err => {
         throw err;
