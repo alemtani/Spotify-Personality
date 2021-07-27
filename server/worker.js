@@ -14,19 +14,21 @@ function start() {
   // Connect to the named work queue
   let workQueue = new Queue('work', REDIS_URL);
 
-  workQueue.process(async (job) => {
-    console.log('Beginning job', job.id);
+  // workQueue.process(async (job) => {
+  //   console.log('Beginning job', job.id);
 
-    await Promise.all([getGenres(job), getProbs()])
-    .then(data => {
-      console.log(data);
-      return data;
-    })
-    .catch(err => {
-      console.log(err);
-      throw err;
-    });
-  });
+  //   await Promise.all([getGenres(job), getProbs()])
+  //   .then(data => {
+  //     console.log(data);
+  //     return data;
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //     throw err;
+  //   });
+  // });
+
+  workQueue.process('./crawler');
 }
 
 // Initialize the clustered worker process
