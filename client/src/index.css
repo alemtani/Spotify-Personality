@@ -12,6 +12,12 @@
     width: 100vh;
 }
 
+@media only screen and (max-width: 600px) {
+    .custom-container {
+        width: 80%;
+    }
+}
+
 .group {
     line-height: 3rem;
 }

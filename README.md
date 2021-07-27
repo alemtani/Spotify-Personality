@@ -16,11 +16,15 @@ https://spotify-personality-test.herokuapp.com/
 
 ### Setup
 1. Clone or download this repository
-2. Run `npm install` under both the `client` and `server`
-3. In your project folder, `cd` to `server`
-4. Run `npm run devStart` to start the backend server
-5. Open a separate terminal in the project root and `cd` to `client`
-6. Run `npm start` to run the React app and open the application in a new tab
+2. Download `redis` and run the server to connect the working queue.
+3. Run `npm install` under both the `client` and `server`
+4. In your project folder, `cd` to `server`
+5. Run `npm run devStart` to start the backend server
+6. Open a separate terminal in the project root and `cd` to `client`
+7. Run `npm start` to run the React app and open the application in a new tab
+
+## Deployment
+Make sure you create a heroku project in your project directory and follow this [guide](https://devcenter.heroku.com/articles/node-redis-workers) for addons in deployment.
 
 ## Using the Application
 1. Log In with Spotify
@@ -35,7 +39,8 @@ https://spotify-personality-test.herokuapp.com/
 4. Once you get your personality, you have the option to read more or try again with a different playlist
 
 ## Notes
-- Sometimes when you authenticate with Spotify, you may get stuck on the `/login` page. You may have to wait until Spotify or its API gets their server(s) running again (rip).
+- Sometimes when you authenticate with Spotify, you may get stuck on the `/login` page. You may have to wait until Spotify gets its server running again (rip).
+- When you start the server locally, it may take up to five minutes to scrape the data and calculate your personality.
 
 ## Sources
 - [Spotify for Developers](https://developer.spotify.com/)
@@ -45,3 +50,4 @@ https://spotify-personality-test.herokuapp.com/
 - [How To Use Promise Throttle](https://github.com/JMPerez/spotify-dedup/blob/b6091581e3700ccbb1e5a0e26dbb59422fa3d15f/app/scripts/main.js#L80)
 - [Authorization Code - State](https://github.com/spotify/web-api-auth-examples)
 - [React with Node Backend - Deployment](https://www.freecodecamp.org/news/how-to-create-a-react-app-with-a-node-backend-the-complete-guide/)
+- [Background Jobs in Node.js](https://devcenter.heroku.com/articles/node-redis-workers)

@@ -2,7 +2,7 @@ const { JSDOM } = require('jsdom');
 const axios = require('axios');
 
 module.exports = async (job, done) => {
-    await Promise.all([getGenres(), getProbs()])
+    await Promise.all([getGenres(job), getProbs()])
     .then(data => {
         done(null, data);
     })
@@ -11,7 +11,7 @@ module.exports = async (job, done) => {
     })
 }
 
-const getGenres = async () => {
+const getGenres = async (job) => {
     try {
         const { data } = await axios.get("https://everynoise.com/engenremap.html");
         const { document } = new JSDOM(data).window;
@@ -180,6 +180,9 @@ const getGenres = async () => {
 
             genre.removeChild(genre.childNodes[1]);
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
+            if (i % 55 == 0) {
+                job.progress(i / 55);
+            }
         }
         return Promise.resolve(genres);
     } catch (err) {
