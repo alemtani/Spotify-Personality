@@ -83,7 +83,7 @@ const asyncTimeout = async (timeout) => {
 
 workQueue.add();
 
-workQueue.on('global:completed', (jobId, result) => {
+workQueue.on('completed', (jobId, result) => {
     console.log(`Job with id ${jobId} completed with result ${result}`);
     [genres, probs] = result;
 })

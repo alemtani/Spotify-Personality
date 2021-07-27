@@ -12,9 +12,8 @@ export default function About() {
                     <div className="text-muted">
                         Disclaimers 
                         <ul>
-                            <li>This is a third party site in development mode and is not in any way associated with Spotify.</li>
-                            <li>Because this is in development mode, email me at <a href="mailto: alemtani@gmail.com">alemtani@gmail.com</a> to use this site.</li>
-                            <li>If the server crashes (i.e. status 503), wait at least a couple of minutes before restarting the application and trying again.</li>
+                            <li>This is a third party site and is not in any way associated with Spotify.</li>
+                            <li>Because this is in development mode, email me at <a href="mailto: alemtani@gmail.com">alemtani@gmail.com</a> your Spotify profile email to use this site.</li>
                         </ul>
                     </div>
                 </div>
