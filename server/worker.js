@@ -1,8 +1,6 @@
 let throng = require('throng');
 let Queue = require("bull");
 
-const {getGenres, getProbs} = require('./crawler');
-
 // Connect to a local redis instance locally, and the Heroku-provided URL in production
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -12,22 +10,7 @@ let workers = process.env.WEB_CONCURRENCY || 2;
 
 function start() {
   // Connect to the named work queue
-  let workQueue = new Queue('work', REDIS_URL);
-
-  // workQueue.process(async (job) => {
-  //   console.log('Beginning job', job.id);
-
-  //   await Promise.all([getGenres(job), getProbs()])
-  //   .then(data => {
-  //     console.log(data);
-  //     return data;
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //     throw err;
-  //   });
-  // });
-
+  const workQueue = new Queue('work', REDIS_URL);
   workQueue.process(__dirname + '/crawler.js');
 }
 
