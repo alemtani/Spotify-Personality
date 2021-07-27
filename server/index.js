@@ -91,12 +91,12 @@ workQueue.on('global:waiting', function(jobId){
    console.log(`Waiting for job ${jobId}`);
 });
 
-workQueue.on('global:active', function(job, jobPromise){
-    console.log(`Job ${job.id} is active with promise ${jobPromise}`)
+workQueue.on('global:active', function(jobId, jobPromise){
+    console.log(`Job ${jobId} is active with promise ${jobPromise}`)
 })
 
-workQueue.on('global:stalled', function(job){
-    console.log(`Job ${job.id} has stalled`);
+workQueue.on('global:stalled', function(jobId){
+    console.log(`Job ${jobId} has stalled`);
 })
 
 // Local events pass the job instance...
@@ -119,9 +119,9 @@ workQueue.on('global:completed', function (jobId, result) {
     })
 });
 
-workQueue.on('global:failed', function(job, err){
+workQueue.on('global:failed', function(jobId, err){
     // A job failed with reason `err`!
-    console.log(`Job ${job.id} failed with reason ${err}`);
+    console.log(`Job ${jobId} failed with reason ${err}`);
 });
 
 workQueue.on('global:paused', function(){
@@ -148,9 +148,9 @@ workQueue.on('global:drained', function() {
     console.log('Queue has processed all waiting jobs');
 });
 
-workQueue.on('global:removed', function(job){
+workQueue.on('global:removed', function(jobId){
     // A job successfully removed.
-    console.log(`Job ${job.id} successfully removed`);
+    console.log(`Job ${jobId} successfully removed`);
 });
 
 // Watch out for 429 errors and automatically retry
