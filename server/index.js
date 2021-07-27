@@ -85,14 +85,16 @@ const asyncTimeout = async (timeout) => {
 
 // Local events pass the job instance...
 workQueue.on('global:progress', function (job, progress) {
-    console.log(`Job ${job.id} is ${progress * 100}% ready!`);
+    console.log(`Job ${job.id} is ${progress}% ready!`);
+    if (progress == 100) {
+        console.log(job);
+    }
 });
 
 workQueue.on('global:completed', function (job, result) {
     console.log(`Job ${job.id} completed! Result: ${result}`);
-    const data = JSON.parse(result);
-    console.log('Data ' + JSON.stringify(data));
-    ({genres, probs} = data);
+    console.log(job);
+    [genres, probs] = result;
     job.remove();
 });
 
@@ -455,82 +457,10 @@ app.post('/api/personality', async (req, res) => {
     } else {
         if (!job) {
             job = await workQueue.add();
+            console.log(job);
         }
         res.json({message: 'Still loading data, come back in a couple of minutes.'});
     }
-
-    // Promise.all([genres, probs])
-    // .then(data => {
-    //     [genres, probs] = data;
-    //     const artistIds = tracks.map(track => track.artists[0].id).filter(id => {
-    //         if (!id) return false;
-    //         return true;
-    //     })
-    
-    //     // Used artist IDs to get the corresponding genres for each
-    //     getArtists(artistIds)
-    //     .then(data => {
-    //         const user = {
-    //             extraverted: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             observant: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             feeling: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             prospecting: {
-    //                 true: 0,
-    //                 false: 0
-    //             },
-    //             turbulent: {
-    //                 true: 0,
-    //                 false: 0
-    //             }
-    //         };
-    
-    //         const artists = data.body.artists;
-    //         artists.forEach(artist => {
-    //             artist.genres.forEach(artistGenre => {
-    //                 // Will see if can find the artist genre in one of the "subgeneres" from the scraped "genres" object
-    //                 let foundMatch = false;
-    
-    //                 genres.every(genre => {
-    //                     genre.subgenres.every(subgenre => {
-    //                         if (subgenre == artistGenre) {
-    //                             foundMatch = true;
-    //                             for (const trait in probs.traits) {
-    //                                 user[trait].true += probs.personality[genre.name][trait] / artists.length / artist.genres.length;
-    //                                 user[trait].false += (1 - probs.personality[genre.name][trait]) / artists.length / artist.genres.length;
-    //                             }
-    //                         }
-    //                         return !foundMatch;
-    //                     });
-    //                     return !foundMatch;
-    //                 });
-    
-    //                 // If genre was not found, use default distribution
-    //                 if (!foundMatch) {
-    //                     for (const trait in probs.traits) {
-    //                         user[trait].true += probs.traits[trait] / artists.length / artist.genres.length;
-    //                         user[trait].false += (1 - probs.traits[trait]) / artists.length / artist.genres.length;
-    //                     }
-    //                 }
-    //             });
-    //         });
-    
-    //         normalize(user);
-    //         res.json(user);
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.sendStatus(err.statusCode || 500);
-    //     });
-    // });
 });
 
 // All other GET requests not handled before will return our React app

@@ -15,12 +15,16 @@ function start() {
   let workQueue = new Queue('work', REDIS_URL);
 
   workQueue.process(async (job) => {
-    const [genres, probs] = await Promise.all([getGenres(job), getProbs()]);
-
-    return {
-      genres: genres,
-      probs: probs
-    };
+    console.log('Beginning job', job.id);
+    
+    Promise.all([getGenres(job), getProbs()])
+    .then(data => {
+      return data;
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    })
   });
 }
 

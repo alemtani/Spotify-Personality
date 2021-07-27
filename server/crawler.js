@@ -171,12 +171,10 @@ exports.getGenres =  async (job) => {
             genre.removeChild(genre.childNodes[1]);
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
             if (i % 55 == 0) {
-                console.log(i / 55);
                 job.progress(i / 55);
             }
-            // console.log(i);
         }
-        return genres;
+        return Promise.resolve(genres);
     } catch (err) {
         throw err;
     }
@@ -321,7 +319,7 @@ exports.getProbs = async () => {
             probs.traits.prospecting, 
             probs.traits.turbulent
         ] = distribution.map(trait => trait / 100);
-        return probs;
+        return Promise.resolve(probs);
     } catch (err) {
         throw err;
     }
