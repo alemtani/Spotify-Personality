@@ -1,10 +1,10 @@
 const { JSDOM } = require('jsdom');
 const axios = require('axios');
 
-module.exports = async (job) => {
+module.exports = async (job, done) => {
     await Promise.all([getGenres(job), getProbs()])
     .then(data => {
-        return Promise.resolve(data);
+        done(null, data);
     })
     .catch(err => {
         throw err;
@@ -180,7 +180,9 @@ const getGenres = async (job) => {
 
             genre.removeChild(genre.childNodes[1]);
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
-            console.log(i);
+            if (i % 55 == 0) {
+                console.log(i / 55);
+            }
         }
         return Promise.resolve(genres);
     } catch (err) {
