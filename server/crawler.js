@@ -11,7 +11,6 @@ module.exports = async (job) => {
         });
     })
     .catch(err => {
-        console.log(err);
         throw err;
     })
 }
