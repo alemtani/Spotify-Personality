@@ -22,6 +22,8 @@ let genres, probs = null;
 
 let job = null;
 
+let progress = 0;
+
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
@@ -83,6 +85,10 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
+workQueue.on('global:progress', (jobId, jobProgress) => {
+    progress = jobProgress;
+})
+
 workQueue.on('global:completed', (jobId, result)  => {
     [genres, probs] = JSON.parse(result);
 
@@ -92,7 +98,7 @@ workQueue.on('global:completed', (jobId, result)  => {
     })
     .catch(err => {
         throw err;
-    })
+    });
 });
 
 // Watch out for 429 errors and automatically retry
@@ -442,7 +448,7 @@ app.post('/api/personality', async (req, res) => {
         });
     } else {
         if (job) {
-            res.json({message: `Job is still loading at ${job._progress}% progress.`});
+            res.json({message: `Job is still loading at ${progress.toFixed(2)}% progress`});
         } else {
             workQueue.empty();
             job = await workQueue.add();

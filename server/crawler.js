@@ -180,10 +180,7 @@ const getGenres = async (job) => {
 
             genre.removeChild(genre.childNodes[1]);
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
-            if (i % 55 == 0) {
-                job.progress(i / 55);
-                console.log(job._progress);
-            }
+            job.progress(i / numGenres * 100);
         }
         return Promise.resolve(genres);
     } catch (err) {
