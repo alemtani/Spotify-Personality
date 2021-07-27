@@ -4,7 +4,7 @@ const axios = require('axios');
 module.exports = async (job) => {
     await Promise.all([getGenres(job), getProbs()])
     .then(data => {
-        return data;
+        return Promise.resolve(data);
     })
     .catch(err => {
         throw err;
@@ -180,12 +180,7 @@ const getGenres = async (job) => {
 
             genre.removeChild(genre.childNodes[1]);
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
-            if (i % 55 == 0) {
-                job.progress(i / 55 - 1);
-            }
-            if (i == 5500) {
-                console.log("has not been resolved yet");
-            }
+            console.log(i);
         }
         return Promise.resolve(genres);
     } catch (err) {
