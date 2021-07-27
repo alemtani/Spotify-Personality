@@ -23,6 +23,8 @@ function start() {
   workQueue.process(maxJobsPerWorker, async (job) => {
     const [genres, probs] = await Promise.all([getGenres(), getProbs()]);
     console.log('Finished processing');
+    console.log(genres);
+    console.log(probs);
     return [genres, probs];
   });
 }

@@ -13,6 +13,7 @@ import {
 
 export default function Personality({ accessToken, tracks }) {
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState('');
     const [personalityType, setPersonalityType] = useState('');
     const [personalityIdentity, setPersonalityIdentity] = useState('');
     const [redoAnalysis, setRedoAnalysis] = useState(false);
@@ -24,10 +25,15 @@ export default function Personality({ accessToken, tracks }) {
             tracks: tracks
         })
         .then(res => {
-            const user = res.data;
-            for (const trait in personality) {
-                personality[trait].true += user[trait].true / length;
-                personality[trait].false += user[trait].false / length;
+            const data = res.data;
+            if (data.message) {
+                setLoading(data.message);
+            } else {
+                setLoading(null);
+                for (const trait in personality) {
+                    personality[trait].true += data[trait].true / length;
+                    personality[trait].false += data[trait].false / length;
+                }
             }
         })
         .catch(err => {
@@ -138,6 +144,10 @@ export default function Personality({ accessToken, tracks }) {
 
     if (error) {
         return <Error error={error}/>;
+    }
+
+    if (loading) {
+        return <Loading message={loading} />
     }
 
     if (!personalityType || !personalityIdentity) {

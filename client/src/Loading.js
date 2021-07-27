@@ -1,11 +1,22 @@
-import { Container } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 
-export default function Loading() {
+export default function Loading({ message }) {
+    function handleBack() {
+        window.location = '/';
+    }
+
     return (
         <Container className="d-flex justify-content-center align-items-center custom-container">
             <div className="info">
-                Loading...
+                <div>
+                    {message || 'Loading...'}
+                </div>
+                {message && (
+                    <Button variant="primary" onClick={handleBack}>
+                        Go Back
+                    </Button>
+                )}
             </div>
         </Container>
-    )
+    );
 }
