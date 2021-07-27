@@ -5,10 +5,13 @@ module.exports = async (job) => {
     await Promise.all([getGenres(job), getProbs()])
     .then(data => {
         const [genres, probs] = data;
-        return Promise.resolve({
+
+        job.data = {
             genres: genres,
             probs: probs
-        });
+        };
+
+        return Promise.resolve(job.data);
     })
     .catch(err => {
         throw err;

@@ -107,15 +107,9 @@ workQueue.on('global:progress', function (jobId, progress) {
 workQueue.on('global:completed', function (jobId, result) {
     console.log(`Job ${jobId} completed! Result: ${result}`);
 
-    if (result) {
-        ({genres, probs} = result);
-        console.log(genres);
-        console.log(probs);
-        result.then(data => console.log(data));
-    }
-
     workQueue.getJob(jobId)
     .then(job => {
+        ({genres, probs} = job.data);
         job.remove();
     })
     .catch(err => {
