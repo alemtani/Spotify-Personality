@@ -83,27 +83,6 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
-// workQueue.on('global:error', (error) => {
-//     console.log(`Error occured ${error}`);
-// })
-
-// workQueue.on('global:waiting', (jobId) => {
-//    console.log(`Waiting for job ${jobId}`);
-// });
-
-// workQueue.on('global:active', (jobId, jobPromise) =>{
-//     console.log(`Job ${jobId} is active with promise ${jobPromise}`)
-// })
-
-// workQueue.on('global:stalled', (jobId) => {
-//     console.log(`Job ${jobId} has stalled`);
-// })
-
-// // Local events pass the job instance...
-// workQueue.on('global:progress', (jobId, progress) => {
-//     console.log(`Job ${jobId} is ${progress}% ready!`);
-// });
-
 workQueue.on('global:completed', (jobId, result)  => {
     [genres, probs] = JSON.parse(result);
 
@@ -115,40 +94,6 @@ workQueue.on('global:completed', (jobId, result)  => {
         throw err;
     })
 });
-
-// workQueue.on('global:failed', (jobId, err) => {
-//     // A job failed with reason `err`!
-//     console.log(`Job ${jobId} failed with reason ${err}`);
-// });
-
-// workQueue.on('global:paused', () => {
-//     // The queue has been paused.
-//     console.log('Queue has been paused');
-// });
-
-// workQueue.on('global:resumed', () => {
-//     // The queue has been resumed.
-//     console.log('Queue has been resumed');
-// });
-
-// workQueue.on('global:cleaned', (jobs, type) => {
-//     // Old jobs have been cleaned from the queue. `jobs` is an array of cleaned
-//     // jobs, and `type` is the type of jobs cleaned.
-//     console.log(`Jobs that have been cleaned are of type ${type}`);
-//     jobs.forEach(job => {
-//         console.log(job.id);
-//     })
-// });
-
-// workQueue.on('global:drained', () => {
-//     // Emitted every time the queue has processed all the waiting jobs (even if there can be some delayed jobs not yet processed)
-//     console.log('Queue has processed all waiting jobs');
-// });
-
-// workQueue.on('global:removed', (jobId) => {
-//     // A job successfully removed.
-//     console.log(`Job ${jobId} successfully removed`);
-// });
 
 // Watch out for 429 errors and automatically retry
 
@@ -464,8 +409,6 @@ app.post('/api/personality', async (req, res) => {
                 artist.genres.forEach(artistGenre => {
                     // Will see if can find the artist genre in one of the "subgeneres" from the scraped "genres" object
                     let foundMatch = false;
-
-                    console.log(genres);
     
                     genres.every(genre => {
                         genre.subgenres.every(subgenre => {
@@ -495,7 +438,6 @@ app.post('/api/personality', async (req, res) => {
             res.json(user);
         })
         .catch(err => {
-            console.log(err);
             res.sendStatus(err.statusCode || 500);
         });
     } else {
