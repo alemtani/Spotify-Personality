@@ -1,7 +1,7 @@
 const { JSDOM } = require('jsdom');
 const axios = require('axios');
 
-module.exports = (job) => {
+module.exports = async (job) => {
     await Promise.all([getGenres(job), getProbs()])
     .then(data => {
         console.log(data);
