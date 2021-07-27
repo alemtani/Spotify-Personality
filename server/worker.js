@@ -17,9 +17,14 @@ function start() {
   workQueue.process(async (job) => {
     console.log('Beginning job', job.id);
 
-    const [genres, probs] = await Promise.all([getGenres(job), getProbs()]);
-
-    return [genres, probs];
+    await Promise.all([getGenres(job), getProbs()])
+    .then(data => {
+      return data;
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
   });
 }
 

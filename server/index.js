@@ -84,20 +84,23 @@ const asyncTimeout = async (timeout) => {
 }
 
 // Local events pass the job instance...
-workQueue.on('global:progress', function (job, progress) {
-    console.log(`Job ${job.id} is ${progress}% ready!`);
-    if (progress == 100) {
-        console.log(job);
-    }
+workQueue.on('global:progress', function (jobId, progress) {
+    console.log(`Job ${jobId} is ${progress}% ready!`);
 });
 
-workQueue.on('global:completed', function (job, result) {
-    console.log(`Job ${job.id} completed! Result: ${result}`);
-    console.log(job);
+workQueue.on('global:completed', function (jobId, result) {
+    console.log(`Job ${jobId} completed! Result: ${result}`);
     if (result) {
         [genres, probs] = result;
     }
-    job.remove();
+    workQueue.getJob(jobId)
+    .then(job => {
+        job.remove();
+    })
+    .catch(err => {
+        console.log(err);
+        throw err;
+    })
 });
 
 // Watch out for 429 errors and automatically retry
