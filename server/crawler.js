@@ -174,6 +174,7 @@ exports.getGenres =  async (job) => {
                 console.log(i / 55);
                 job.progress(i / 55);
             }
+            // console.log(i);
         }
         return genres;
     } catch (err) {

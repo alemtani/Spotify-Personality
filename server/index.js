@@ -20,6 +20,8 @@ let workQueue = new Queue('work', REDIS_URL);
 
 let genres, probs = null;
 
+let job = null;
+
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
@@ -81,14 +83,12 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
-workQueue.add({genres, probs});
-
 // Local events pass the job instance...
-workQueue.on('progress', function (job, progress) {
+workQueue.on('global:progress', function (job, progress) {
     console.log(`Job ${job.id} is ${progress * 100}% ready!`);
 });
 
-workQueue.on('completed', function (job, result) {
+workQueue.on('global:completed', function (job, result) {
     console.log(`Job ${job.id} completed! Result: ${result}`);
     const data = JSON.parse(result);
     console.log('Data ' + JSON.stringify(data));
@@ -453,6 +453,9 @@ app.post('/api/personality', async (req, res) => {
             res.sendStatus(err.statusCode || 500);
         });
     } else {
+        if (!job) {
+            job = await workQueue.add();
+        }
         res.json({message: 'Still loading data, come back in a couple of minutes.'});
     }
 
