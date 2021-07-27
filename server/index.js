@@ -456,6 +456,7 @@ app.post('/api/personality', async (req, res) => {
         });
     } else {
         if (!job) {
+            workQueue.empty();
             job = await workQueue.add();
             console.log(job);
         }
