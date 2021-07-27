@@ -441,7 +441,7 @@ app.post('/api/personality', async (req, res) => {
             res.sendStatus(err.statusCode || 500);
         });
     } else {
-        if (job && job._progress) {
+        if (job) {
             res.json({message: `Job is still loading at ${job._progress}% progress.`});
         } else {
             workQueue.empty();

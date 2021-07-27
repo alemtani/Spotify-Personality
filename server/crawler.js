@@ -182,6 +182,7 @@ const getGenres = async (job) => {
             genres[mainGenreIndex].subgenres.push(genre.textContent.trim());
             if (i % 55 == 0) {
                 job.progress(i / 55);
+                console.log(job._progress);
             }
         }
         return Promise.resolve(genres);
