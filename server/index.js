@@ -83,6 +83,22 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
+workQueue.on('global:error', function(error) {
+    console.log(`Error occured ${error}`);
+})
+
+workQueue.on('global:waiting', function(jobId){
+   console.log(`Waiting for job ${jobId}`);
+});
+
+workQueue.on('global:active', function(job, jobPromise){
+    console.log(`Job ${job.id} is active with promise ${jobPromise}`)
+})
+
+workQueue.on('global:stalled', function(job){
+    console.log(`Job ${job.id} has stalled`);
+})
+
 // Local events pass the job instance...
 workQueue.on('global:progress', function (jobId, progress) {
     console.log(`Job ${jobId} is ${progress}% ready!`);
@@ -101,6 +117,40 @@ workQueue.on('global:completed', function (jobId, result) {
         console.log(err);
         throw err;
     })
+});
+
+workQueue.on('global:failed', function(job, err){
+    // A job failed with reason `err`!
+    console.log(`Job ${job.id} failed with reason ${err}`);
+});
+
+workQueue.on('global:paused', function(){
+    // The queue has been paused.
+    console.log('Queue has been paused');
+});
+
+workQueue.on('global:resumed', function(job){
+    // The queue has been resumed.
+    console.log('Queue has been resumed');
+});
+
+workQueue.on('global:cleaned', function(jobs, type) {
+    // Old jobs have been cleaned from the queue. `jobs` is an array of cleaned
+    // jobs, and `type` is the type of jobs cleaned.
+    console.log(`Jobs that have been cleaned are of type ${type}`);
+    jobs.forEach(job => {
+        console.log(job.id);
+    })
+});
+
+workQueue.on('global:drained', function() {
+    // Emitted every time the queue has processed all the waiting jobs (even if there can be some delayed jobs not yet processed)
+    console.log('Queue has processed all waiting jobs');
+});
+
+workQueue.on('global:removed', function(job){
+    // A job successfully removed.
+    console.log(`Job ${job.id} successfully removed`);
 });
 
 // Watch out for 429 errors and automatically retry
