@@ -14,7 +14,7 @@ export default function About() {
                         <ul>
                             <li>This is a third party site and is not in any way associated with Spotify.</li>
                             <li>Because this website is in development mode, email me <a href="mailto: alemtani@gmail.com">alemtani@gmail.com</a> your Spotify profile email to use this application.</li>
-                            <li>Most likely, the server will restart when you open the application and you will need to wait up to five minutes before you can get a personality type for a playlist.</li>
+                            <li>Most likely, the server will restart when you open the application. When you make your first request for your personality, you will have to wait up to five minutes and then try again.</li>
                         </ul>
                     </div>
                 </div>

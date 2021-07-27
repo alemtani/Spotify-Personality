@@ -443,8 +443,11 @@ app.post('/api/personality', async (req, res) => {
     } else {
         if (job && job._progress) {
             res.json({message: `Job is still loading at ${job._progress}% progress.`});
+        } else {
+            workQueue.empty();
+            job = await workQueue.add();
+            res.json({message: 'Starting loading job for web data; come back in around five minutes.'});
         }
-        res.json({message: 'Still loading job; come back in around five minutes.'});
     }
 });
 
@@ -453,7 +456,4 @@ app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
   });
 
-app.listen(PORT, async () => {
-    workQueue.empty();
-    job = await workQueue.add();
-});
+app.listen(PORT);
