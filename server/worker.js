@@ -19,6 +19,7 @@ function start() {
 
     await Promise.all([getGenres(job), getProbs()])
     .then(data => {
+      console.log(data);
       return data;
     })
     .catch(err => {
