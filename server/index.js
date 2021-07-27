@@ -105,7 +105,10 @@ const asyncTimeout = async (timeout) => {
 // });
 
 workQueue.on('global:completed', (jobId, result)  => {
+    console.log(result);
     [genres, probs] = result;
+    console.log(genres);
+    console.log(probs);
 
     workQueue.getJob(jobId)
     .then(job => {
