@@ -28,7 +28,7 @@ function start() {
   //   });
   // });
 
-  workQueue.process(__dirname + '/server/crawler.js');
+  workQueue.process(__dirname + '/crawler.js');
 }
 
 // Initialize the clustered worker process
