@@ -94,7 +94,9 @@ workQueue.on('global:progress', function (job, progress) {
 workQueue.on('global:completed', function (job, result) {
     console.log(`Job ${job.id} completed! Result: ${result}`);
     console.log(job);
-    [genres, probs] = result;
+    if (result) {
+        [genres, probs] = result;
+    }
     job.remove();
 });
 
@@ -458,7 +460,6 @@ app.post('/api/personality', async (req, res) => {
         if (!job) {
             workQueue.empty();
             job = await workQueue.add();
-            console.log(job);
         }
         res.json({message: 'Still loading data, come back in a couple of minutes.'});
     }
