@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
+import { Redirect } from 'react-router-dom';
 
 export default function Loading({ message }) {
+    const [back, setBack] = useState(false);
+
     function handleBack() {
-        window.location = '/';
+        setBack(true);
+    }
+
+    if (back) {
+        return <Redirect to="/" />;
     }
 
     return (

@@ -81,12 +81,20 @@ const asyncTimeout = async (timeout) => {
     setTimeout(() => {}, timeout);
 }
 
-workQueue.add();
+workQueue.add({genres, probs});
 
-workQueue.on('completed', (jobId, result) => {
-    console.log(`Job with id ${jobId} completed with result ${result}`);
-    [genres, probs] = result;
-})
+// Local events pass the job instance...
+workQueue.on('progress', function (job, progress) {
+    console.log(`Job ${job.id} is ${progress * 100}% ready!`);
+});
+
+workQueue.on('completed', function (job, result) {
+    console.log(`Job ${job.id} completed! Result: ${result}`);
+    const data = JSON.parse(result);
+    console.log('Data ' + JSON.stringify(data));
+    ({genres, probs} = data);
+    job.remove();
+});
 
 // Watch out for 429 errors and automatically retry
 
