@@ -1,7 +1,19 @@
 const { JSDOM } = require('jsdom');
 const axios = require('axios');
 
-exports.getGenres =  async (job) => {
+module.exports = (job) => {
+    await Promise.all([getGenres(job), getProbs()])
+    .then(data => {
+        console.log(data);
+        return Promise.resolve(data);
+    })
+    .catch(err => {
+        console.log(err);
+        throw err;
+    })
+}
+
+const getGenres = async (job) => {
     try {
         const { data } = await axios.get("https://everynoise.com/engenremap.html");
         const { document } = new JSDOM(data).window;
@@ -180,7 +192,7 @@ exports.getGenres =  async (job) => {
     }
 }
 
-exports.getProbs = async () => {
+const getProbs = async () => {
     try {
         const { data } = await axios.get("https://www.16personalities.com/country-profiles/united-states");
         const { document } = new JSDOM(data).window;
