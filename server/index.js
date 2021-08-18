@@ -448,7 +448,7 @@ app.post('/api/personality', async (req, res) => {
             res.sendStatus(err.statusCode || 500);
         });
     } else {
-        res.json({message: `Still loading data at ${progress}% progress`});
+        res.json({message: `Still loading data at ${progress.toFixed(2)}% progress`});
     }
 });
 
