@@ -20,7 +20,8 @@ let workQueue = new Queue('work', REDIS_URL);
 
 let genres, probs = null;
 
-let job = null;
+workQueue.empty();
+workQueue.add();
 
 let progress = 0;
 
@@ -447,13 +448,7 @@ app.post('/api/personality', async (req, res) => {
             res.sendStatus(err.statusCode || 500);
         });
     } else {
-        if (job) {
-            res.json({message: `Job is still loading at ${progress.toFixed(2)}% progress`});
-        } else {
-            workQueue.empty();
-            job = await workQueue.add();
-            res.json({message: 'Starting loading job for web data; come back in around five minutes.'});
-        }
+        res.json({message: `Still loading data at ${progress}% progress`});
     }
 });
 
